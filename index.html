@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블루 아카이브 기존/신규 가챠 시뮬레이터</title>
+    
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <style>
+        body { font-family: "Malgun Gothic", sans-serif; padding: 20px; max-width: 1000px; margin: 0 auto; line-height: 1.6; }
+        .input-group { margin-bottom: 12px; }
+        label { display: inline-block; width: 160px; font-weight: bold; }
+        input[type="number"] { width: 100px; padding: 5px; }
+        
+        /* 버튼 스타일 및 비활성화 상태 스타일 */
+        button { margin-top: 15px; padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer; background-color: #0056b3; color: white; border: none; border-radius: 5px; transition: background-color 0.3s; }
+        button:hover:not(:disabled) { background-color: #004494; }
+        button:disabled { background-color: #a0c4e8; cursor: not-allowed; }
+        
+        /* 출력 영역 스타일 */
+        #text-output { white-space: pre-wrap; background: #f4f6f9; padding: 20px; border-radius: 8px; margin-top: 25px; border: 1px solid #d1d5db; font-family: monospace; font-size: 14px; }
+        #plot-output { margin-top: 20px; }
+        
+        /* 로딩 인디케이터 스타일 */
+        #loading-indicator {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ffeeba;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 기간별 폼 및 삭제 버튼 스타일 */
+        .period-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .period-row input[type="number"] { width: 60px; }
+        .remove-btn { margin-top: 0; padding: 5px 10px; font-size: 14px; background-color: #dc3545; }
+        .remove-btn:hover:not(:disabled) { background-color: #c82333; }
+        .add-btn { background-color: #28a745; margin-top: 0; padding: 8px 16px; margin-bottom: 20px;}
+        .add-btn:hover:not(:disabled) { background-color: #218838; }
+    </style>
+</head>
+<body>
+    <h1>블루 아카이브 기존/신규 가챠 시뮬레이터</h1>
+    
+    <!-- 로딩 상태 알림창 -->
+    <div id="loading-indicator">
+        ⏳ 파이썬 구동 환경 및 라이브러리를 다운로드하고 있습니다.<br>
+        <span style="font-size: 14px; font-weight: normal;">(네트워크 환경에 따라 5~15초 정도 소요되며, 완료 후 버튼이 활성화됩니다.)</span>
+    </div>
+
+    <!-- 입력 폼 UI -->
+    <div id="plan-container">
+        <div class="period-row">
+            <strong>[기간 1]</strong>
+            <label style="width: auto;">목표 명함:</label>
+            <input type="number" class="p_targets" value="2" min="1"> 명
+            <label style="width: auto; margin-left: 10px;">목표 중복:</label>
+            <input type="number" class="p_dupes" value="0" min="0"> 번
+            <label style="width: auto; margin-left: 10px;">
+                <input type="checkbox" class="p_free100"> 무료 100연
+            </label>
+            <label style="width: auto; margin-left: 10px;">
+                <input type="checkbox" class="p_fes"> Fes(3★ 6%)
+            </label>
+            <input type="text" class="p_memo" placeholder="(픽업 학생/목표 등 메모)" style="width: 130px; margin-left: 10px; padding: 5px;">
+            <button type="button" class="remove-btn" onclick="removePeriod(this)" disabled>✕</button>
+        </div>
+    </div>
+    <button type="button" class="add-btn" onclick="addPeriod()">+ 기간 추가</button>
+
+    <div class="input-group">
+        <label for="percentiles">관찰 백분위수(%):</label>
+        <input type="text" id="percentiles" value="1, 5, 10, 25, 50, 90, 95, 99" style="width: 250px;" placeholder="쉼표(,)로 구분하여 입력">
+    </div>
+    
+    <button id="run-btn" disabled>시뮬레이션 준비 중...</button>
+    
+    <!-- 출력 영역 -->
+    <div id="text-output">여기에 결과가 출력됩니다. 상단의 '시뮬레이션 실행하기' 버튼을 눌러주세요.</div>
+    <button id="toggle-plot-btn" style="display: none; margin-bottom: 10px;">일반 확률 분포(PMF) 보기</button>
+    <div id="plot-output">
+        <div id="plot-cumulative"></div>
+        <div id="plot-regular" style="display: none;"></div>
+    </div>
+
+    <!-- 파이썬 스크립트 본문 -->
+    <script type="py">
+import random
+import itertools
+import json
+from pyscript import document, display, when, window
+
+def get_percentiles(dist, pct_list):
+    pcts = {k: k / 100.0 for k in pct_list}
+    res = {}
+    cum = 0.0
+    sorted_keys = sorted(pcts.keys())
+    k_idx = 0
+    for i, prob in enumerate(dist):
+        cum += prob
+        while k_idx < len(sorted_keys) and cum >= pcts[sorted_keys[k_idx]]:
+            res[sorted_keys[k_idx]] = i
+            k_idx += 1
+        if k_idx >= len(sorted_keys):
+            break
+    return res
+
+def convolve_dists(dist1, dist2):
+    if not dist1: return dist2
+    if not dist2: return dist1
+    res = [0.0] * (len(dist1) + len(dist2) - 1)
+    for i, p1 in enumerate(dist1):
+        if p1 < 1e-8: continue 
+        for j, p2 in enumerate(dist2):
+            if p2 < 1e-8: continue
+            res[i+j] += p1 * p2
+    return res
+
+def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False):
+    p_pickup = 0.007
+    p_off_indiv = 0.001 if is_fes else 0.0
+    p_3star_total = 0.06 if is_fes else 0.03
+    p_3star_off = p_3star_total - p_pickup
+    p_2star = 0.185
+    p_1star = 1.0 - p_3star_total - p_2star
+    target_fes_count = max(0, n_targets - 1)
+    p_target_fes_off = target_fes_count * p_off_indiv
+    
+    target_pickups = n_targets + d_dupes
+    
+    # ---------------------------------------------------------
+    # 1. 기존 방식 (마일리지 공유 연속 마르코프 체인)
+    # ---------------------------------------------------------
+    max_pulls_old = target_pickups * 200
+    old_pulls_dist = [0.0] * (max_pulls_old + 1)
+    
+    dp_old = {0: 1.0}  # state: p (목표 획득 수)
+    total_old_eligma = 0.0
+    total_old_eleph = 0.0
+    total_old_early = 0.0  # 명함 페널티 보정을 위한 조기 획득 추적
+    
+    for i in range(1, max_pulls_old + 1):
+        if not dp_old: break
+        new_dp = {}
+        is_spark = 1 if i % 200 == 0 else 0
+        
+        for p, prob in dp_old.items():
+            # 동적 확률 및 자원 기댓값을 위한 상태 계산
+            remaining_fes_targets = max(0, n_targets - p - 1)
+            owned_fes_targets = max(0, n_targets - 1) - remaining_fes_targets
+            
+            p_banner = 0.007
+            p_off_target = remaining_fes_targets * 0.001 if is_fes else 0.0
+            p_owned_fes = owned_fes_targets * 0.001 if is_fes else 0.0
+            p_trash = 1.0 - p_banner - p_off_target
+            
+            # 엘레프: 픽업은 무조건 100개, '이미 보유한' 픽뚫은 30개 (필요한 픽뚫 명함은 0개이므로 제외됨)
+            e_eligma = p_3star_total * 50 + p_2star * 10 + p_1star * 1
+            e_eleph = (p_banner * 100) + (p_owned_fes * 30)
+            
+            total_old_eligma += prob * e_eligma
+            total_old_eleph += prob * e_eleph
+            
+            if is_spark:  # 천장 시 자원 및 진행도 추가
+                total_old_eligma += prob * 50
+                total_old_eleph += prob * 100
+                
+            nxt_p1 = p + 1 + is_spark  # 픽업 획득
+            nxt_p2 = p + 1 + is_spark  # 픽뚫 유효타 획득
+            nxt_p3 = p + 0 + is_spark  # 꽝 또는 중복
+            
+            for nxt_p, pr in [(nxt_p1, p_banner), (nxt_p2, p_off_target), (nxt_p3, p_trash)]:
+                if pr > 0:
+                    if nxt_p >= target_pickups:
+                        old_pulls_dist[i] += prob * pr
+                    else:
+                        new_dp[nxt_p] = new_dp.get(nxt_p, 0.0) + prob * pr
+        dp_old = new_dp
+
+    # ---------------------------------------------------------
+    # 2. 신규 방식 (호출챠지 공유 연속 마르코프 체인)
+    # ---------------------------------------------------------
+    max_pulls_new = target_pickups * 200
+    new_pulls_dist = [0.0] * (max_pulls_new + 1)
+    
+    dp_new = {(0, 0): 1.0}  # state: (p: 획득 수, c: 호출챠지 스택)
+    total_new_eligma = 0.0
+    total_new_eleph = 0.0
+    total_new_early = 0.0
+    
+    for i in range(1, max_pulls_new + 1):
+        if not dp_new: break
+        next_dp = {}
+        for (p, c), prob in dp_new.items():
+            c_next = c + 1
+            
+            remaining_fes_targets = max(0, n_targets - p - 1)
+            owned_fes_targets = max(0, n_targets - 1) - remaining_fes_targets
+            
+            p_off_target = remaining_fes_targets * 0.001 if is_fes else 0.0
+            p_owned_fes = owned_fes_targets * 0.001 if is_fes else 0.0
+            
+            if c_next == 100:
+                p_banner = 0.5
+                e_eligma = 50.0
+                e_eleph = (0.5 * 100) + (p_owned_fes * 30)
+            elif c_next == 200:
+                p_banner = 1.0
+                p_off_target = 0.0
+                p_owned_fes = 0.0
+                e_eligma = 50.0
+                e_eleph = 100.0
+            else:
+                p_banner = 0.007
+                e_eligma = p_3star_total * 50 + p_2star * 10 + p_1star * 1
+                e_eleph = (0.007 * 100) + (p_owned_fes * 30)
+                
+            p_trash = 1.0 - p_banner - p_off_target
+            
+            total_new_eligma += prob * e_eligma
+            total_new_eleph += prob * e_eleph
+            
+            # 상태 전이 분기
+            nxt_p1, nxt_c1 = p + 1, 0        # 픽업 획득 -> p 증가, 챠지 초기화
+            nxt_p2, nxt_c2 = p + 1, c_next   # 픽뚫 유효타 -> p 증가, 챠지 유지
+            nxt_p3, nxt_c3 = p, c_next       # 꽝 / 중복 -> p 유지, 챠지 유지
+            
+            for (nxt_p, nxt_c), pr in [((nxt_p1, nxt_c1), p_banner), ((nxt_p2, nxt_c2), p_off_target), ((nxt_p3, nxt_c3), p_trash)]:
+                if pr > 0:
+                    if nxt_p >= target_pickups:
+                        new_pulls_dist[i] += prob * pr
+                    else:
+                        next_dp[(nxt_p, nxt_c)] = next_dp.get((nxt_p, nxt_c), 0.0) + prob * pr
+        dp_new = next_dp
+
+    # ---------------------------------------------------------
+    # 3. 자원 Base 페널티 일괄 보정
+    # ---------------------------------------------------------
+    # 모든 목표를 중복으로 가정하고 계산했으므로, 초회 획득 명함 수(n_targets)만큼 엘리그마 50 차감
+    total_old_eligma -= n_targets * 50
+    total_new_eligma -= n_targets * 50
+
+    # 무료 100연 적용 (자원은 유지하되, 확률 분포의 실질 가챠 횟수만 왼쪽으로 시프트)
+    if has_free100:
+        def apply_free_pulls(dist, free_count):
+            res_d = []
+            for idx, prob in enumerate(dist):
+                cost = max(0, idx - free_count)
+                while len(res_d) <= cost: res_d.append(0.0)
+                res_d[cost] += prob
+            return res_d
+            
+        old_pulls_dist = apply_free_pulls(old_pulls_dist, 100)
+        new_pulls_dist = apply_free_pulls(new_pulls_dist, 100)
+    
+    # 실질적인 평균 가챠 횟수 최종 계산
+    paid_avg_pulls_old = sum(i * p for i, p in enumerate(old_pulls_dist))
+    paid_avg_pulls_new = sum(i * p for i, p in enumerate(new_pulls_dist))
+    
+    return {
+        "old_avg_pulls": paid_avg_pulls_old, "old_avg_eligma": total_old_eligma, "old_avg_eleph": total_old_eleph,
+        "new_avg_pulls": paid_avg_pulls_new, "new_avg_eligma": total_new_eligma, "new_avg_eleph": total_new_eleph,
+        "old_pulls_dist": old_pulls_dist, "new_pulls_dist": new_pulls_dist
+    }
+
+@when("click", "#run-btn")
+def run_simulation(event=None):
+    out_div = document.getElementById("text-output")
+    
+    try:
+        pct_str = document.getElementById("percentiles").value
+        pct_list = sorted(list(set([int(x.strip()) for x in pct_str.split(',') if x.strip().isdigit()])))
+        if not pct_list:
+            pct_list = [1, 5, 10, 25, 50, 90, 95, 99]
+
+        rows = document.querySelectorAll(".period-row")
+        periods = []
+        for row in rows:
+            n = int(row.querySelector(".p_targets").value)
+            d = int(row.querySelector(".p_dupes").value)
+            is_fes = row.querySelector(".p_fes").checked
+            has_free100 = row.querySelector(".p_free100").checked
+            
+            memo = row.querySelector(".p_memo").value.strip()
+            periods.append({"n": n, "d": d, "is_fes": is_fes, "has_free100": has_free100, "memo": memo})
+    except Exception as e:
+        out_div.innerText = "오류: 입력값이 올바르지 않습니다. 숫자를 정확히 입력해주세요."
+        return
+
+    out_div.innerText = "수학적 확률 계산 및 분포를 합성 중입니다. (기간이 길어질수록 약간의 시간이 소요될 수 있습니다)..."
+    
+    total_old_dist = [1.0]
+    total_new_dist = [1.0]
+    t_old_pulls = t_old_eligma = t_old_eleph = 0.0
+    t_new_pulls = t_new_eligma = t_new_eleph = 0.0
+    total_n = total_d = 0
+    
+    for p in periods:
+        res = simulate_pulls_to_target(n_targets=p["n"], d_dupes=p["d"], is_fes=p["is_fes"], has_free100=p["has_free100"])
+        
+        # 서로 다른 기간(Period) 간의 합산은 마일리지 공유가 안 되므로 합성
+        total_old_dist = convolve_dists(total_old_dist, res["old_pulls_dist"])
+        total_new_dist = convolve_dists(total_new_dist, res["new_pulls_dist"])
+        
+        t_old_pulls += res["old_avg_pulls"]
+        t_old_eligma += res["old_avg_eligma"]
+        t_old_eleph += res["old_avg_eleph"]
+        
+        t_new_pulls += res["new_avg_pulls"]
+        t_new_eligma += res["new_avg_eligma"]
+        t_new_eleph += res["new_avg_eleph"]
+        
+        total_n += p["n"]
+        total_d += p["d"]
+    
+    old_pct = get_percentiles(total_old_dist, pct_list)
+    new_pct = get_percentiles(total_new_dist, pct_list)
+    
+    old_pct_str = " / ".join([f"{k}%({v}뽑)" for k, v in sorted(old_pct.items())])
+    new_pct_str = " / ".join([f"{k}%({v}뽑)" for k, v in sorted(new_pct.items())])
+    old_eligma_rate = (t_old_eligma / t_old_pulls) if t_old_pulls else 0
+    new_eligma_rate = (t_new_eligma / t_new_pulls) if t_new_pulls else 0
+    diff_eligma = new_eligma_rate - old_eligma_rate
+    pct_eligma = (diff_eligma / old_eligma_rate * 100) if old_eligma_rate else 0
+
+    old_eleph_rate = (t_old_eleph / t_old_pulls) if t_old_pulls else 0
+    new_eleph_rate = (t_new_eleph / t_new_pulls) if t_new_pulls else 0
+    diff_eleph = new_eleph_rate - old_eleph_rate
+    pct_eleph = (diff_eleph / old_eleph_rate * 100) if old_eleph_rate else 0
+    
+    memo_list = []
+    for i, p in enumerate(periods):
+        display_name = p["memo"] if p["memo"] else f"기간 {i+1}"
+        memo_list.append(f"{display_name}(명함{p['n']}, 중복{p['d']})")
+
+    diff_pulls = t_new_pulls - t_old_pulls
+    pct_pulls = ((t_new_pulls - t_old_pulls) / t_old_pulls * 100) if t_old_pulls else 0
+    
+    result_text = f"[가챠 계획 요약 | 총 {len(periods)}개 기간 | 전체 목표 명함: {total_n}명, 중복: {total_d}명]\n"
+    result_text += f"[세부 목표: {', '.join(memo_list)}]\n"
+    result_text += f"[관찰 백분위수: {', '.join(map(str, pct_list))} %]\n\n"
+    
+    result_text += "■ 기존 방식 (기간별 독립)\n"
+    result_text += f"  - 총 평균 소모 가챠     : {t_old_pulls:.2f}뽑\n"
+    result_text += f"  - 상위% 달성 가챠 횟수  : {old_pct_str}\n"
+    result_text += f"  - 1뽑당 획득 엘리그마   : {old_eligma_rate:.2f}개\n"
+    result_text += f"  - 1뽑당 획득 엘레프     : {old_eleph_rate:.2f}개\n\n"
+    
+    result_text += "■ 신규 방식 (기간별 독립)\n"
+    result_text += f"  - 총 평균 소모 가챠     : {t_new_pulls:.2f}뽑\n"
+    result_text += f"  - 상위% 달성 가챠 횟수  : {new_pct_str}\n"
+    result_text += f"  - 1뽑당 획득 엘리그마   : {new_eligma_rate:.2f}개\n"
+    result_text += f"  - 1뽑당 획득 엘레프     : {new_eleph_rate:.2f}개\n\n"
+    
+    result_text += "■ 결과 비교 (신규 - 기존)\n"
+    result_text += f"  - 평균 소모 가챠 차이     : {diff_pulls:+.2f}뽑 ({pct_pulls:+.1f}%) (낮을수록 좋음)\n"
+    result_text += f"  - 1뽑당 획득 엘리그마 차이: {diff_eligma:+.2f}개 ({pct_eligma:+.1f}%) (높을수록 좋음)\n"
+    result_text += f"  - 1뽑당 획득 엘레프 차이  : {diff_eleph:+.2f}개 ({pct_eleph:+.1f}%) (높을수록 좋음)\n"
+    result_text += "\n(누적 모집 점수 보상은 아직 세부내용이 공개되지 않았으므로 계산에 포함하지 않음)"
+    
+    out_div.innerText = result_text
+    
+    max_idx = max(len(total_old_dist), len(total_new_dist)) - 1
+    while max_idx > 0 and (max_idx >= len(total_old_dist) or total_old_dist[max_idx] < 1e-6) and (max_idx >= len(total_new_dist) or total_new_dist[max_idx] < 1e-6):
+        max_idx -= 1
+        
+    x_old = list(range(len(total_old_dist)))
+    x_new = list(range(len(total_new_dist)))
+    y_old_cum = list(itertools.accumulate(total_old_dist))
+    y_new_cum = list(itertools.accumulate(total_new_dist))
+
+    trace_old_reg = {
+        "x": x_old[:max_idx+1], "y": total_old_dist[:max_idx+1],
+        "type": "scatter", "mode": "lines", "fill": "tozeroy",
+        "name": "Old", "line": {"color": "rgba(0, 0, 255, 0.8)"},
+        "fillcolor": "rgba(0, 0, 255, 0.2)",
+        "hovertemplate": "%{x}회<extra>Old</extra>"
+    }
+    trace_new_reg = {
+        "x": x_new[:max_idx+1], "y": total_new_dist[:max_idx+1],
+        "type": "scatter", "mode": "lines", "fill": "tozeroy",
+        "name": "New", "line": {"color": "rgba(255, 0, 0, 0.8)"},
+        "fillcolor": "rgba(255, 0, 0, 0.2)",
+        "hovertemplate": "%{x}회<extra>New</extra>"
+    }
+    
+    avg_shapes = [
+        {"type": "line", "x0": t_old_pulls, "x1": t_old_pulls, "y0": 0, "y1": 1, "yref": "paper", "line": {"color": "blue", "dash": "dash"}},
+        {"type": "line", "x0": t_new_pulls, "x1": t_new_pulls, "y0": 0, "y1": 1, "yref": "paper", "line": {"color": "red", "dash": "dash"}}
+    ]
+
+    layout_reg = {
+        "title": f"PMF | {len(periods)} Periods (Target: {total_n} + Dupe: {total_d})",
+        "xaxis": {"title": "Total Pulls Required"},
+        "yaxis": {"title": "Probability"},
+        "hovermode": "x unified",
+        "shapes": avg_shapes
+    }
+
+    def get_interpolated_x(target_y_list, x_list, y_list):
+        res_x = []
+        idx = 0
+        n = len(y_list)
+        for ty in target_y_list:
+            if ty <= y_list[0]:
+                res_x.append(float(x_list[0]))
+                continue
+            if ty >= y_list[-1]:
+                res_x.append(float(x_list[-1]))
+                continue
+            
+            while idx < n - 1 and y_list[idx+1] < ty:
+                idx += 1
+                
+            y0, y1 = y_list[idx], y_list[idx+1]
+            x0, x1 = x_list[idx], x_list[idx+1]
+            
+            if y1 == y0:
+                res_x.append(float(x0))
+            else:
+                ratio = (ty - y0) / (y1 - y0)
+                res_x.append(x0 + ratio * (x1 - x0))
+        return res_x
+
+    shared_y_cum = [i / 1000.0 for i in range(1001)]
+    shared_x_old = get_interpolated_x(shared_y_cum, x_old[:max_idx+1], y_old_cum[:max_idx+1])
+    shared_x_new = get_interpolated_x(shared_y_cum, x_new[:max_idx+1], y_new_cum[:max_idx+1])
+
+    trace_old_cum = {
+        "x": shared_x_old, "y": shared_y_cum,
+        "type": "scatter", "mode": "lines",
+        "name": "기존(Old) 누적확률", "line": {"color": "blue"},
+        "hovertemplate": "%{x:.1f}뽑<extra>기존(Old)</extra>"
+    }
+    trace_new_cum = {
+        "x": shared_x_new, "y": shared_y_cum,
+        "type": "scatter", "mode": "lines",
+        "name": "신규(New) 누적확률", "line": {"color": "red"},
+        "hovertemplate": "%{x:.1f}뽑<extra>신규(New)</extra>"
+    }
+
+    old_pct_x = [v for k, v in sorted(old_pct.items())]
+    old_pct_y = [k / 100.0 for k, v in sorted(old_pct.items())]
+    
+    trace_old_pct = {
+        "x": old_pct_x, "y": old_pct_y,
+        "type": "scatter", "mode": "markers", 
+        "marker": {"symbol": "diamond", "size": 10, "color": "blue"},
+        "name": "기존(Old) 백분위수",
+        "hoverinfo": "skip"
+    }
+
+    new_pct_x = [v for k, v in sorted(new_pct.items())]
+    new_pct_y = [k / 100.0 for k, v in sorted(new_pct.items())]
+
+    trace_new_pct = {
+        "x": new_pct_x, "y": new_pct_y,
+        "type": "scatter", "mode": "markers",
+        "marker": {"symbol": "diamond", "size": 10, "color": "red"},
+        "name": "신규(New) 백분위수",
+        "hoverinfo": "skip"
+    }
+
+    layout_cum = {
+        "title": f"CDF(그래프가 위에 있으면 비교우위) | {len(periods)} Periods (Target: {total_n} + Dupe: {total_d})",
+        "xaxis": {"title": "Total Pulls Required"},
+        "yaxis": {"title": "Cumulative Probability (0.0 ~ 1.0)", "range": [0, 1.05]},
+        "hovermode": "y unified",
+        "shapes": avg_shapes
+    }
+
+    def render_plot(target_id, traces, layout):
+        data_js = window.JSON.parse(json.dumps(traces))
+        layout_js = window.JSON.parse(json.dumps(layout))
+        window.Plotly.newPlot(target_id, data_js, layout_js)
+
+    render_plot("plot-regular", [trace_old_reg, trace_new_reg], layout_reg)
+    render_plot("plot-cumulative", [trace_old_cum, trace_new_cum, trace_old_pct, trace_new_pct], layout_cum)
+    
+    toggle_btn = document.getElementById("toggle-plot-btn")
+    toggle_btn.style.display = "inline-block"
+    toggle_btn.innerText = "일반 확률 분포(PMF) 보기"
+    document.getElementById("plot-cumulative").style.display = "block"
+    document.getElementById("plot-regular").style.display = "none"
+
+@when("click", "#toggle-plot-btn")
+def toggle_plot(event=None):
+    btn = document.getElementById("toggle-plot-btn")
+    plot_cum = document.getElementById("plot-cumulative")
+    plot_reg = document.getElementById("plot-regular")
+
+    if plot_cum.style.display != "none":
+        plot_cum.style.display = "none"
+        plot_reg.style.display = "block"
+        btn.innerText = "누적 확률 분포(CMF) 보기"
+    else:
+        plot_cum.style.display = "block"
+        plot_reg.style.display = "none"
+        btn.innerText = "일반 확률 분포(PMF) 보기"
+
+document.getElementById("loading-indicator").style.display = "none"
+btn = document.getElementById("run-btn")
+btn.disabled = False
+btn.innerText = "계산 실행하기"
+    </script>
+    <!-- 동적 폼 제어 자바스크립트 -->
+    <script>
+        let periodCount = 1;
+        function addPeriod() {
+            periodCount++;
+            const container = document.getElementById('plan-container');
+            const row = document.createElement('div');
+            row.className = 'period-row';
+            row.innerHTML = `
+                <strong>[기간 ${periodCount}]</strong>
+                <label style="width: auto;">목표 명함:</label>
+                <input type="number" class="p_targets" value="1" min="1"> 명
+                <label style="width: auto; margin-left: 10px;">목표 중복:</label>
+                <input type="number" class="p_dupes" value="0" min="0"> 번
+                <label style="width: auto; margin-left: 10px;">
+                    <input type="checkbox" class="p_free100"> 무료 100연
+                </label>
+                <label style="width: auto; margin-left: 10px;">
+                    <input type="checkbox" class="p_fes"> Fes(3★ 6%)
+                </label>
+                <input type="text" class="p_memo" placeholder="(픽업 학생/목표 등 메모)" style="width: 130px; margin-left: 10px; padding: 5px;">
+                <button type="button" class="remove-btn" onclick="removePeriod(this)">✕</button>
+            `;
+            container.appendChild(row);
+            updateRemoveButtons();
+        }
+        function removePeriod(btn) {
+            const container = document.getElementById('plan-container');
+            if (container.children.length > 1) {
+                btn.parentElement.remove();
+                updateRemoveButtons();
+            }
+        }
+        function updateRemoveButtons() {
+            const btns = document.querySelectorAll('.remove-btn');
+            btns.forEach(b => b.disabled = (btns.length === 1)); // 최소 1개 유지
+        }
+    </script>
+</body>
+</html>
