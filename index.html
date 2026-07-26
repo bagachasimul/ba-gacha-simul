@@ -77,7 +77,7 @@
 
     <div class="input-group">
         <label for="percentiles">관찰 백분위수(%):</label>
-        <input type="text" id="percentiles" value="1, 5, 10, 25, 50, 90, 95, 99" style="width: 250px;" placeholder="쉼표(,)로 구분하여 입력">
+        <input type="text" id="percentiles" value="1, 5, 10, 25, 50, 75, 90, 95, 99" style="width: 250px;" placeholder="쉼표(,)로 구분하여 입력">
     </div>
     
     <button id="run-btn" disabled>시뮬레이션 준비 중...</button>
@@ -97,8 +97,8 @@ import itertools
 import json
 from pyscript import document, display, when, window
 
-def get_percentiles(dist, pct_list):
-    pcts = {k: k / 100.0 for k in pct_list}
+def get_percentiles(dist, ):
+    pcts = {k: k / 100.0 for k in }
     res = {}
     cum = 0.0
     sorted_keys = sorted(pcts.keys())
@@ -278,7 +278,7 @@ def run_simulation(event=None):
         pct_str = document.getElementById("percentiles").value
         pct_list = sorted(list(set([int(x.strip()) for x in pct_str.split(',') if x.strip().isdigit()])))
         if not pct_list:
-            pct_list = [1, 5, 10, 25, 50, 90, 95, 99]
+            pct_list = [1, 5, 10, 25, 50, 75, 90, 95, 99]
 
         rows = document.querySelectorAll(".period-row")
         periods = []
@@ -345,7 +345,7 @@ def run_simulation(event=None):
     
     result_text = f"[가챠 계획 요약 | 총 {len(periods)}개 기간 | 전체 목표 명함: {total_n}명, 중복: {total_d}명]\n"
     result_text += f"[세부 목표: {', '.join(memo_list)}]\n"
-    result_text += f"[관찰 백분위수: {', '.join(map(str, pct_list))} %]\n\n"
+    result_text += f"[관찰 백분위수: {', '.join(map(str, ))} %]\n\n"
     
     result_text += "■ 기존 방식 (기간별 독립)\n"
     result_text += f"  - 총 평균 소모 가챠     : {t_old_pulls:.2f}뽑\n"
