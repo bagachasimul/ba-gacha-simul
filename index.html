@@ -342,6 +342,16 @@ def run_simulation(event=None):
 
     diff_pulls = t_new_pulls - t_old_pulls
     pct_pulls = ((t_new_pulls - t_old_pulls) / t_old_pulls * 100) if t_old_pulls else 0
+
+    pct_compare_list = []
+    for k in sorted(old_pct.keys()):
+        v_old = old_pct[k]
+        v_new = new_pct[k]
+        diff_v = v_new - v_old
+        pct_v = (diff_v / v_old * 100) if v_old > 0 else 0.0
+        pct_compare_list.append(f"{k}%: {diff_v:+}뽑 ({pct_v:+.1f}%)")
+        
+    pct_compare_str = " / ".join(pct_compare_list)
     
     result_text = f"[가챠 계획 요약 | 총 {len(periods)}개 기간 | 전체 목표 명함: {total_n}명, 중복: {total_d}명]\n"
     result_text += f"[세부 목표: {', '.join(memo_list)}]\n"
@@ -361,6 +371,7 @@ def run_simulation(event=None):
     
     result_text += "■ 결과 비교 (신규 - 기존)\n"
     result_text += f"  - 평균 소모 가챠 차이     : {diff_pulls:+.2f}뽑 ({pct_pulls:+.1f}%) (낮을수록 좋음)\n"
+    result_text += f"  - 상위% 달성 가챠횟수 차이: {pct_compare_str} (낮을수록 좋음)\n"
     result_text += f"  - 1뽑당 획득 엘리그마 차이: {diff_eligma:+.2f}개 ({pct_eligma:+.1f}%) (높을수록 좋음)\n"
     result_text += f"  - 1뽑당 획득 엘레프 차이  : {diff_eleph:+.2f}개 ({pct_eleph:+.1f}%) (높을수록 좋음)\n"
     result_text += "\n(누적 모집 점수 보상은 아직 세부내용이 공개되지 않았으므로 계산에 포함하지 않음)"
