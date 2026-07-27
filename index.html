@@ -349,7 +349,12 @@ def run_simulation(event=None):
         v_new = new_pct[k]
         diff_v = v_new - v_old
         pct_v = (diff_v / v_old * 100) if v_old > 0 else 0.0
-        pct_compare_list.append(f"{k}%: {diff_v:+}뽑 ({pct_v:+.1f}%)")
+        
+        # 차이가 0.0% 수준이면 "-"로 표기
+        if abs(pct_v) < 0.05:
+            pct_compare_list.append(f"{k}%: (-)")
+        else:
+            pct_compare_list.append(f"{k}%: {diff_v:+}뽑 ({pct_v:+.1f}%)")
         
     pct_compare_str = " / ".join(pct_compare_list)
     
