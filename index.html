@@ -369,9 +369,9 @@ def run_simulation(event=None):
         
     pct_compare_str = " / ".join(pct_compare_list)
 
-    colored_pulls = get_colored_span(diff_pulls, f"{diff_pulls:+.2f}뽑 ({pct_pulls:+.1f}%)", lower_is_better=True)
-    colored_eligma = get_colored_span(diff_eligma, f"{diff_eligma:+.2f}개 ({pct_eligma:+.1f}%)", lower_is_better=False)
-    colored_eleph = get_colored_span(diff_eleph, f"{diff_eleph:+.2f}개 ({pct_eleph:+.1f}%)", lower_is_better=False)
+    colored_pulls = get_colored_span(pct_pulls, f"{diff_pulls:+.2f}뽑 ({pct_pulls:+.1f}%)", lower_is_better=True)
+    colored_eligma = get_colored_span(pct_eligma, f"{diff_eligma:+.2f}개 ({pct_eligma:+.1f}%)", lower_is_better=False)
+    colored_eleph = get_colored_span(pct_eleph, f"{diff_eleph:+.2f}개 ({pct_eleph:+.1f}%)", lower_is_better=False)
     
     result_text = f"[가챠 계획 요약 | 총 {len(periods)}개 기간 | 전체 목표 명함: {total_n}명, 중복: {total_d}명]\n"
     result_text += f"[세부 목표: {', '.join(memo_list)}]\n"
