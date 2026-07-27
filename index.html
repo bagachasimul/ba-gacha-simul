@@ -352,9 +352,9 @@ def run_simulation(event=None):
         
         # 차이가 0.0% 수준이면 "-"로 표기
         if abs(pct_v) < 0.05:
-            pct_compare_list.append(f"{k}%: -")
+            pct_compare_list.append(f"{k}%( - )")
         else:
-            pct_compare_list.append(f"{k}%: {diff_v:+}뽑 ({pct_v:+.1f}%)")
+            pct_compare_list.append(f"{k}%({diff_v:+}뽑)")
         
     pct_compare_str = " / ".join(pct_compare_list)
     
