@@ -342,21 +342,36 @@ def run_simulation(event=None):
 
     diff_pulls = t_new_pulls - t_old_pulls
     pct_pulls = ((t_new_pulls - t_old_pulls) / t_old_pulls * 100) if t_old_pulls else 0
-
+    
+    def get_colored_span(diff_val, text_str, lower_is_better=True):
+        if diff_val <= -0.05:
+            color = "#2e7d32" if lower_is_better else "#d32f2f" # 초록 / 빨강
+        elif diff_val >= 0.05:
+            color = "#d32f2f" if lower_is_better else "#2e7d32" # 빨강 / 초록
+        else:
+            color = "inherit" # 차이가 없으면 기본 색상
+        
+        # 색상이 들어갈 경우 굵은 글씨(bold)로 강조
+        weight = "bold" if color != "inherit" else "normal"
+        return f"<span style='color: {color}; font-weight: {weight};'>{text_str}</span>"
+    
     pct_compare_list = []
     for k in sorted(old_pct.keys()):
         v_old = old_pct[k]
         v_new = new_pct[k]
         diff_v = v_new - v_old
         pct_v = (diff_v / v_old * 100) if v_old > 0 else 0.0
+
+        val_str = f"{diff_v:+}뽑"
         
-        # 차이가 0.0% 수준이면 "-"로 표기
-        if abs(pct_v) < 0.05:
-            pct_compare_list.append(f"{k}%( - )")
-        else:
-            pct_compare_list.append(f"{k}%({diff_v:+}뽑)")
+        colored_val = get_colored_span(pct_v, val_str, lower_is_better=True)
+        pct_compare_list.append(f"{k}%({colored_val})")
         
     pct_compare_str = " / ".join(pct_compare_list)
+
+    colored_pulls = get_colored_span(diff_pulls, f"{diff_pulls:+.2f}뽑 ({pct_pulls:+.1f}%)", lower_is_better=True)
+    colored_eligma = get_colored_span(diff_eligma, f"{diff_eligma:+.2f}개 ({pct_eligma:+.1f}%)", lower_is_better=False)
+    colored_eleph = get_colored_span(diff_eleph, f"{diff_eleph:+.2f}개 ({pct_eleph:+.1f}%)", lower_is_better=False)
     
     result_text = f"[가챠 계획 요약 | 총 {len(periods)}개 기간 | 전체 목표 명함: {total_n}명, 중복: {total_d}명]\n"
     result_text += f"[세부 목표: {', '.join(memo_list)}]\n"
@@ -375,13 +390,13 @@ def run_simulation(event=None):
     result_text += f"  - 1뽑당 획득 엘레프     : {new_eleph_rate:.2f}개\n\n"
     
     result_text += "■ 결과 비교 (신규 - 기존)\n"
-    result_text += f"  - 평균 소모 가챠 차이     : {diff_pulls:+.2f}뽑 ({pct_pulls:+.1f}%) (낮을수록 좋음)\n"
+    result_text += f"  - 평균 소모 가챠 차이     : {colored_pulls} (낮을수록 좋음)\n"
     result_text += f"  - 상위% 달성 가챠횟수 차이: {pct_compare_str} (낮을수록 좋음)\n"
-    result_text += f"  - 1뽑당 획득 엘리그마 차이: {diff_eligma:+.2f}개 ({pct_eligma:+.1f}%) (높을수록 좋음)\n"
-    result_text += f"  - 1뽑당 획득 엘레프 차이  : {diff_eleph:+.2f}개 ({pct_eleph:+.1f}%) (높을수록 좋음)\n"
+    result_text += f"  - 1뽑당 획득 엘리그마 차이: {colored_eligma} (높을수록 좋음)\n"
+    result_text += f"  - 1뽑당 획득 엘레프 차이  : {colored_eleph} (높을수록 좋음)\n"
     result_text += "\n(누적 모집 점수 보상은 아직 세부내용이 공개되지 않았으므로 계산에 포함하지 않음)"
     
-    out_div.innerText = result_text
+    out_div.innerHTML = result_text.replace('\n', '<br>').replace('  ', '&nbsp;&nbsp;')
     
     max_idx = max(len(total_old_dist), len(total_new_dist)) - 1
     while max_idx > 0 and (max_idx >= len(total_old_dist) or total_old_dist[max_idx] < 1e-6) and (max_idx >= len(total_new_dist) or total_new_dist[max_idx] < 1e-6):
