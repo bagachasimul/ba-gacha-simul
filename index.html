@@ -174,10 +174,8 @@
 
 	<!-- 파이썬 스크립트 본문 -->
 	<script type="py">
-import random
 import itertools
 import json
-import math
 from pyscript import document, display, when, window
 
 # ---------------------------------------------------------
@@ -643,7 +641,7 @@ def run_simulation(event=None):
 		else:
 			color = "inherit" # 차이가 없으면 기본 색상
 		
-		# 색상이 들어갈 경우 굵은 글씨(bold)로 강조
+		# 색상이 들어갈 경우 굵은 글씨로 강조
 		weight = "bold" if color != "inherit" else "normal"
 		return f"<span style='color: {color}; font-weight: {weight};'>{text_str}</span>"
 	
