@@ -73,9 +73,9 @@
 		#loading-indicator { background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; border: 1px solid #ffeeba; margin-bottom: 20px; font-weight: bold; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
 		/* 기간별 폼 스타일 */
-		.period-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; background-color: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #dee2e6; }
-		.period-row input[type="number"] { width: 50px; }
-		.remove-btn { padding: 6px 12px; font-size: 14px; margin: 0; }
+        .period-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; background-color: #f8f9fa; padding: 10px; padding-right: 50px; border-radius: 6px; border: 1px solid #dee2e6; position: relative; }
+        .period-row input[type="number"] { width: 50px; }
+        .remove-btn { padding: 6px 12px; font-size: 14px; margin: 0; position: absolute; top: 10px; right: 10px; }
 		
 		/* 툴팁 스타일 */
 		.tooltip { position: relative; display: inline-flex; align-items: center; justify-content: center; cursor: help; background-color: #6c757d; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 11px; margin-left: 5px; font-weight: bold; }
@@ -737,7 +737,7 @@ btn.innerText = "계산 실행하기"
 						0이 입력된다면 항상 고의 천장 전략을 사용합니다.<br>
 						항상 고의천장 전략을 사용하는 것이 1뽑당 엘리그마/엘레프 획득효율은 가장 높지만, 그만큼 청휘석 소모량이 많아집니다.</span></div>
 					</label>
-
+                    </span>
 					<input type="text" class="p_memo save-target" placeholder="(메모)" value="${memo}" style="width: 120px; margin-left: 10px;">
 					<button type="button" class="btn-danger remove-btn" onclick="removePeriod(this)">✕</button>
 				</div>
