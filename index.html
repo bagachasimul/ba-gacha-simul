@@ -246,7 +246,7 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 	total_old_eleph = 0.0
 	
 	for i in range(1, max_pulls_old + 1):
-		if not dp_old: break # 모든 평행우주에서 목표를 달성했다면 반복을 멈춥니다.
+		if not dp_old: break # 모든 평행우주에서 목표를 달성했다면 종료
 		new_dp = {}
 		
 		# 이번 뽑기에서 모집포인트 200이 달성(천장)되었는지를 나타내는 플래그
