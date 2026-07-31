@@ -222,7 +222,7 @@ def convolve_dists(dist1, dist2, prune_threshold=1e-8):
 def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False, is_10pull=True, use_ceiling=False, ceiling_th=150, init_c_dist=None, prune_threshold=1e-8):
 	# 기본 확률 세팅
 	p_pickup = 0.007 # 픽업 획득 확률 0.7%
-	p_off_indiv = 0.001 if is_fes else 0.0 # 페스 기간일 때, 다른 페스 캐릭터가 픽뚫로 나올 확률은 각 0.1%임
+	p_off_indiv = 0.001 if is_fes else 0.0 # 페스 기간일 때, 다른 페스 학생가 픽뚫로 나올 확률은 각 0.1%임
 	p_3star_total = 0.06 if is_fes else 0.03 # 3성 획득 확률 (일반 3%, 페스 6%)
 	p_3star_off = p_3star_total - p_pickup # 픽업을 제외한 나머지 3성(픽뚫) 확률
 	p_2star = 0.185 # 2성 확률 18.5%
@@ -239,7 +239,7 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 	old_pulls_dist = [0.0] * (max_pulls_old + 1)
 	
 	# dp_old는 현재 가챠 상태를 저장하는 "평행 우주(경우의 수)" 목록
-	# { 현재까지 뽑은 캐릭터 수 : 이 상황이 발생할 확률 } 구조임
+	# { 현재까지 뽑은 학생 수 : 이 상황이 발생할 확률 } 구조임
 	dp_old = {0: 1.0}
 	
 	total_old_eligma = 0.0
@@ -340,7 +340,7 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 	if init_c_dist is None:
 		init_c_dist = {0: 1.0}
 	
-	# dp_new의 상태: (현재까지 뽑은 캐릭터 수, 현재 쌓인 호출차지 스택)
+	# dp_new의 상태: (현재까지 뽑은 학생 수, 현재 쌓인 호출차지 스택)
 	dp_new = {(0, c): prob for c, prob in init_c_dist.items() if prob >= prune_threshold} # (p: 획득 수, c: 호출차지 스택)
 	
 	# 이번 기간에 대한 시뮬레이션이 끝났을 때, 호출차지의 분포를 저장하기 위한 변수(다음 기간으로 이월될 예정)
@@ -464,7 +464,7 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 	# ---------------------------------------------------------
 	# 3. 엘리그마 재계산 및 무료100연/누적모집티켓 반영하여 순소모 가챠횟수 계산
 	# ---------------------------------------------------------
-	# 아까 위에서 "모든 캐릭터 획득을 중복으로 가정"하고 엘리그마를 50개씩 다 줬기 때문에,
+	# 아까 위에서 "모든 학생 획득을 중복으로 가정"하고 엘리그마를 50개씩 다 줬기 때문에,
 	# 명함 개수(중복으로 뽑지 않은 횟수)만큼은 50개씩 다시 빼줘서 정확하게 계산
 	total_old_eligma -= n_targets * 50
 	total_new_eligma -= n_targets * 50
