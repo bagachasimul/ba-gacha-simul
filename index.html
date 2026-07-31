@@ -228,10 +228,6 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 	p_2star = 0.185 # 2성 확률 18.5%
 	p_1star = 1.0 - p_3star_total - p_2star # 나머지 1성 확률 (페스 가챠에선 3성확률이 3%p 올라간 만큼 1성 확률이 3%p 낮아짐)
 	
-	# 목표 페스캐가 픽뚫로 뜰 합산확률
-	target_fes_count = max(0, n_targets - 1)
-	p_target_fes_off = target_fes_count * p_off_indiv
-	
 	target_pickups = n_targets + d_dupes # 총 뽑아야 하는 픽업 횟수
 	
 	# ---------------------------------------------------------
