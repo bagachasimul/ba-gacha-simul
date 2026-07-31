@@ -270,7 +270,6 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 			p_1star_actual = 0.0 if is_guaranteed_2star else p_1star
 			
 			# 엘레프: 픽업은 무조건 100개, '이미 보유한' 픽뚫은 30개 (필요한 픽뚫 명함은 0개이므로 제외됨)
-			# [획득 재화 계산 트릭]
 			# 계산을 효율적으로 하기 위해 "이번에 나온 3성은 무조건 중복"이라고 일단 가정하고,
 			# 무조건 엘리그마 50개를 획득하는 것으로 계산.
 			# (나중에, 엘리그마가 지급되지 않는 명함 개수만큼 50개를 다시 빼줘서 오차 수정)
@@ -281,7 +280,7 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 			total_old_eligma += prob * e_eligma
 			total_old_eleph += prob * e_eleph
 			
-			if is_spark:  # 천장에 도달하면 확정 보상을 가챠와는 별개로 추가 반영(교환 방식이므로). 역시 우선은 중복으로 가정하고, 추후 명함 개수만큼 50개씩 엘리그마를 빼서 오차 수정
+			if is_spark: # 천장에 도달하면 확정 보상을 가챠와는 별개로 추가 반영(교환 방식이므로). 역시 우선은 중복으로 가정하고, 추후 명함 개수만큼 50개씩 엘리그마를 빼서 오차 수정
 				total_old_eligma += prob * 50
 				total_old_eleph += prob * 100
 			
@@ -340,8 +339,8 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 	if init_c_dist is None:
 		init_c_dist = {0: 1.0}
 	
-	# dp_new의 상태: (현재까지 뽑은 학생 수, 현재 쌓인 호출차지 스택)
-	dp_new = {(0, c): prob for c, prob in init_c_dist.items() if prob >= prune_threshold} # (p: 획득 수, c: 호출차지 스택)
+	# (현재까지 뽑은 학생 수, 현재 쌓인 호출차지 스택)
+	dp_new = {(0, c): prob for c, prob in init_c_dist.items() if prob >= prune_threshold}
 	
 	# 이번 기간에 대한 시뮬레이션이 끝났을 때, 호출차지의 분포를 저장하기 위한 변수(다음 기간으로 이월될 예정)
 	end_c_dist = {}
@@ -355,14 +354,10 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 		# [누적모집횟수 보상] - 자잘한 재화는 제외하고, 엘리그마와 10연챠 티켓만 반영 예정
 		# 우선 해당 횟수 도달 시점의 전체 확률(살아있는 우주들의 합)만큼 엘리그마 보상 반영
 		current_prob_sum = sum(dp_new.values())
-		if i == 30:
-			total_new_eligma += current_prob_sum * 10
-		elif i == 110:
-			total_new_eligma += current_prob_sum * 20
-		elif i == 230:
-			total_new_eligma += current_prob_sum * 10
-		elif i == 310:
-			total_new_eligma += current_prob_sum * 20
+		if i == 30: total_new_eligma += current_prob_sum * 10
+		elif i == 110: total_new_eligma += current_prob_sum * 20
+		elif i == 230: total_new_eligma += current_prob_sum * 10
+		elif i == 310: total_new_eligma += current_prob_sum * 20
 		
 		is_guaranteed_2star = is_10pull and (i % 10 == 0)
 		
@@ -573,7 +568,7 @@ def run_simulation(event=None):
 	# 신규 가챠의 첫 번째 기간 시작 시 초기 호출차지 적용
 	current_c_dist = {init_charge_val: 1.0}
 	
-	# 각 기간별로 계산 후, 여러 기간에 대해 합성
+	# 각 기간별로 계산 / 여러 기간에 대해 합성
 	for p in periods:
 		# 이번 기간에 대해 계산
 		res = simulate_pulls_to_target(
