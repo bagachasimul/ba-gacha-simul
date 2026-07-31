@@ -214,7 +214,6 @@ def convolve_dists(dist1, dist2, prune_threshold=1e-8):
 			if p2 < prune_threshold: continue
 			res[i+j] += p1 * p2 # 발생할 확률을 서로 곱해서 새로운 결과값에 더해줌
 	return res
-	return res
 
 # ---------------------------------------------------------
 # [시뮬레이션 함수]
