@@ -335,22 +335,22 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 		dp_old = new_dp
 
 	# ---------------------------------------------------------
-	# 2. 신규 방식 (호출챠지 시스템 / 이월 가능) - 마르코프 체인으로 계산
+	# 2. 신규 방식 (호출차지 시스템 / 이월 가능) - 마르코프 체인으로 계산
 	# ---------------------------------------------------------
 	max_pulls_new = target_pickups * 200
 	if is_10pull: max_pulls_new += 10
 	new_pulls_dist = [0.0] * (max_pulls_new + 1)
 	
-	# 신규 방식은 이전 픽업에서 쌓아둔 '호출챠지'가 이월됨
-	# 따라서 잔여 호출 챠지의 분포를 추적하여 각 기간에 입력으로 제공해야 함
-	# 만약 이번 기간에 대한 호출 챠지의 분포가 따로 입력되지 않았다면, 항상 0포인트인 것으로 가정
+	# 신규 방식은 이전 픽업에서 쌓아둔 '호출차지'가 이월됨
+	# 따라서 잔여 호출 차지의 분포를 추적하여 각 기간에 입력으로 제공해야 함
+	# 만약 이번 기간에 대한 호출 차지의 분포가 따로 입력되지 않았다면, 항상 0포인트인 것으로 가정
 	if init_c_dist is None:
 		init_c_dist = {0: 1.0}
 	
-	# dp_new의 상태: (현재까지 뽑은 캐릭터 수, 현재 쌓인 호출챠지 스택)
-	dp_new = {(0, c): prob for c, prob in init_c_dist.items() if prob >= prune_threshold} # (p: 획득 수, c: 호출챠지 스택)
+	# dp_new의 상태: (현재까지 뽑은 캐릭터 수, 현재 쌓인 호출차지 스택)
+	dp_new = {(0, c): prob for c, prob in init_c_dist.items() if prob >= prune_threshold} # (p: 획득 수, c: 호출차지 스택)
 	
-	# 이번 기간에 대한 시뮬레이션이 끝났을 때, 호출챠지의 분포를 저장하기 위한 변수(다음 기간으로 이월될 예정)
+	# 이번 기간에 대한 시뮬레이션이 끝났을 때, 호출차지의 분포를 저장하기 위한 변수(다음 기간으로 이월될 예정)
 	end_c_dist = {}
 	
 	total_new_eligma = 0.0
@@ -375,7 +375,7 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 		
 		next_dp = {}
 		for (p, c), prob in dp_new.items():
-			c_next = c + 1 # 가챠 1회당 호출챠지 스택 +1
+			c_next = c + 1 # 가챠 1회당 호출차지 스택 +1
 			
 			remaining_fes_targets = max(0, n_targets - p - 1)
 			owned_fes_targets = max(0, n_targets - 1) - remaining_fes_targets
@@ -383,18 +383,18 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 			p_off_target = remaining_fes_targets * p_off_indiv if is_fes else 0.0 # 픽뚫로 목표 페스캐를 명함 획득할 확률, 페스 가챠가 아니라면 픽뚫 고려하지 않으므로 0%로 설정
 			p_owned_fes = owned_fes_targets * p_off_indiv if is_fes else 0.0 # 픽뚫로 목표 페스캐를 중복 획득할 확률, 페스 가챠가 아니라면 픽뚫 고려하지 않으므로 0%로 설정
 			
-			# [호출챠지 100]
+			# [호출차지 100]
 			if c_next == 100:
-				# 호출챠지 100회차에서 페스캐 픽뚫 확률이 픽뚫 50% 중 어떻게 분배되어 있는지 알 수 없으므로
+				# 호출차지 100회차에서 페스캐 픽뚫 확률이 픽뚫 50% 중 어떻게 분배되어 있는지 알 수 없으므로
 				# (기존처럼 페스 픽뚫 확률 합산 0.9%(각 0.1%)가 유지되고 통상 3성 픽뚫 확률 49.1%일지,
 				#  아니면 균등 비례 확장되어 페스 픽뚫 확률이 약 8.49%(각 0.9434%)로 확대될지 아직 알 수 없으므로,
-				#  보수적으로 가정하여 호출챠지 100 시점에서도 페스 픽뚫 확률 합산을 0.9%로 가정한다.)
+				#  보수적으로 가정하여 호출차지 100 시점에서도 페스 픽뚫 확률 합산을 0.9%로 가정한다.)
 				
 				p_banner = 0.5 # 이번 뽑기에선 픽업 확률 50%
 				e_eligma = 50.0 # 3성 확정이므로, 일단은 중복으로 가정하여 엘리그마 50개 획득(추후, 목표 명함 갯수만큼 다시 제해서 엘리그마 획득량을 정확하게 맞출 예정)
 				e_eleph = (0.5 * 100) + (p_owned_fes * 30) # 50%확률로 픽업캐 엘레프 100개 획득, 거기에 픽뚫로 목표 페스캐를 중복 획득할 확률로 목표 엘레프 30개 얻을 수 있는 점을 반영하여 계산. 픽뚫로 목표 페스캐 명함을 얻은 경우는 초회 엘레프 지급이 아직 없으므로 엘레프 계산에선 합산하지 않음
 				
-			# [호출챠지 200]
+			# [호출차지 200]
 			elif c_next == 200:
 				p_banner = 1.0 # 이번 뽑기에선 픽업 확률 100%
 				p_off_target = 0.0
@@ -421,10 +421,10 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 			
 			# 10연차 모드에서 목표 달성 이후 마르코프 체인의 상태 공간이 불필요하게 확장되지 않도록 상한선 적용(p값이 목표를 달성한 시점부터는 종료 조건에 영향을 미치지 않기 때문에 달성도를 불필요하게 추적하여 연산량을 늘릴 필요가 없음)
 			# *엘리그마/엘레프 획득량은 상한선의 적용 여부와 상관 없이 정확하게 계산됨
-			nxt_p1, nxt_c1 = min(target_pickups, p + 1), 0		# 픽업 획득 -> 목표 달성도 증가, 호출챠지 초기화 
-			nxt_p2, nxt_c2 = min(target_pickups, p + 1), c_next	# 픽뚫로 목표 '명함' 획득 -> 목표 달성도 증가, 챠지 유지 (배너 스위칭)
-			nxt_p3, nxt_c3 = min(target_pickups, p), c_next		# 픽뚫로 목표 '중복' 획득 -> 목표 달성도 유지, 챠지 유지 (픽뚫 중복으로 획득되는 엘레프 30개 때문에 비정상적인 조기 종료가 이뤄지지 않도록 목표 달성도 유지)(픽뚫 중복 획득 엘레프는 앞에서 이미 정상적으로 계산함, 종료 조건에만 영향을 미치지 않게 한 것)
-			nxt_p4, nxt_c4 = min(target_pickups, p), c_next		# 꽝 -> p 유지, 챠지 유지
+			nxt_p1, nxt_c1 = min(target_pickups, p + 1), 0		# 픽업 획득 -> 목표 달성도 증가, 호출차지 초기화 
+			nxt_p2, nxt_c2 = min(target_pickups, p + 1), c_next	# 픽뚫로 목표 '명함' 획득 -> 목표 달성도 증가, 차지 유지 (배너 스위칭)
+			nxt_p3, nxt_c3 = min(target_pickups, p), c_next		# 픽뚫로 목표 '중복' 획득 -> 목표 달성도 유지, 차지 유지 (픽뚫 중복으로 획득되는 엘레프 30개 때문에 비정상적인 조기 종료가 이뤄지지 않도록 목표 달성도 유지)(픽뚫 중복 획득 엘레프는 앞에서 이미 정상적으로 계산함, 종료 조건에만 영향을 미치지 않게 한 것)
+			nxt_p4, nxt_c4 = min(target_pickups, p), c_next		# 꽝 -> p 유지, 차지 유지
 			
 			for (nxt_p, nxt_c), pr in [((nxt_p1, nxt_c1), p_banner), ((nxt_p2, nxt_c2), p_off_target), ((nxt_p3, nxt_c3), p_owned_fes), ((nxt_p4, nxt_c4), p_true_trash)]:
 				if pr > 0:
@@ -452,7 +452,7 @@ def simulate_pulls_to_target(n_targets, d_dupes, is_fes=False, has_free100=False
 							
 				if can_stop:
 					new_pulls_dist[i] += p_val
-					# 종료 시점에 남은 호출챠지는 다음 픽업으로 이월하기 위해 따로 저장해둠
+					# 종료 시점에 남은 호출차지는 다음 픽업으로 이월하기 위해 따로 저장해둠
 					end_c_dist[state_key[1]] = end_c_dist.get(state_key[1], 0.0) + p_val
 					keys_to_remove.append(state_key)
 					
@@ -570,7 +570,7 @@ def run_simulation(event=None):
 	t_new_pulls = t_new_eligma = t_new_eleph = 0.0
 	total_n = total_d = 0
 	
-	# 사용자가 설정한 초기 호출챠지 값 읽어오기
+	# 사용자가 설정한 초기 호출차지 값 읽어오기
 	try:
 		init_charge_val = int(document.getElementById("init-charge").value)
 		init_charge_val = max(0, min(199, init_charge_val)) # 0 ~ 199 사이로 제한
@@ -592,7 +592,7 @@ def run_simulation(event=None):
 			prune_threshold=prune_val
 		)
 		
-		# 다음 기간에 대해 호출챠지가 이월되도록 매개변수 설정
+		# 다음 기간에 대해 호출차지가 이월되도록 매개변수 설정
 		current_c_dist = res["end_c_dist"]
 		
 		# 이전 기간과 현재 기간의 확률분포를 합성
