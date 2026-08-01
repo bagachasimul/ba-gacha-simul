@@ -8,77 +8,316 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 	
 	<style>
-		body { font-family: "Malgun Gothic", sans-serif; padding: 20px; max-width: 1050px; margin: 0 auto; line-height: 1.6; }
-		.input-group { margin-bottom: 12px; }
-		label { display: inline-block; width: 160px; font-weight: bold; }
-		input[type="number"], select, input[type="text"] { padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
-		
-		/* 네비게이션 메뉴 스타일 */
-		.nav-menu { background-color: #f8f9fa; padding: 12px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #dee2e6; display: flex; gap: 10px; flex-wrap: wrap; }
-		.nav-menu a { text-decoration: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; color: white; transition: background-color 0.3s; }
-		.nav-home { background-color: #17a2b8; }
-		.nav-home:hover { background-color: #138496; }
-		.nav-plan { background-color: #0056b3; }
-		.nav-plan:hover { background-color: #004494; }
-		.nav-sim { background-color: #6c757d; }
-		.nav-sim:hover { background-color: #5a6268; }
-		.nav-github { background-color: #6c757d; }
-		.nav-github:hover { background-color: #5a6268; }
-		
-		/* 버튼 스타일 */
-		button { margin-top: 10px; padding: 10px 20px; font-size: 15px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px; transition: background-color 0.3s; }
-		.btn-primary { background-color: #0056b3; color: white; }
-		.btn-primary:hover:not(:disabled) { background-color: #004494; }
-		.btn-primary:disabled { background-color: #a0c4e8; cursor: not-allowed; }
-		.btn-success { background-color: #28a745; color: white; margin-bottom: 15px; }
-		.btn-success:hover { background-color: #218838; }
-		.btn-danger { background-color: #dc3545; color: white; }
-		.btn-danger:hover { background-color: #c82333; }
-		.btn-secondary { background-color: #6c757d; color: white; }
-		.btn-secondary:hover { background-color: #5a6268; }
-		.btn-info { background-color: #17a2b8; color: white; }
-		.btn-info:hover { background-color: #138496; }
-		.btn-capture {
-			background-color: #ff8c00;
-			color: white;
-			border: 1px solid #e67e22;
-			padding: 12px 24px;
-			font-size: 16px;
-			border-radius: 6px;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-			transition: all 0.2s ease;
-		}
-		.btn-capture:hover:not(:disabled) {
-			background-color: #e67e22;
-			transform: translateY(-2px);
-			box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-		}
-		.btn-capture:disabled,
-		.btn-info:disabled		{
-			background-color: #e2e8f0;
-			color: #94a3b8;
-			border: 1px solid #cbd5e1;
-			box-shadow: none;
-			cursor: not-allowed;
-			transform: none;
-		}
-		/* 출력 영역 스타일 */
-		#capture-area { background-color: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #d1d5db; margin-top: 20px; }
-		#text-output { white-space: pre-wrap; background: #f4f6f9; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 14px; border: 1px solid #e2e8f0; }
-		#plot-output { margin-top: 20px; }
+	  /* =========================================
+		 기본 및 공통 레이아웃
+		 ========================================= */
+	  body { 
+		font-family: "Malgun Gothic", sans-serif; 
+		padding: 20px; 
+		max-width: 1050px; 
+		margin: 0 auto; 
+		line-height: 1.6; 
+	  }
 
-		/* 기간별 폼 스타일 */
-        .period-row { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; background-color: #f8f9fa; padding: 10px; padding-right: 50px; border-radius: 6px; border: 1px solid #dee2e6; position: relative; }
-        .period-row input[type="number"] { width: 50px; }
-        .remove-btn { padding: 6px 12px; font-size: 14px; margin: 0; position: absolute; top: 10px; right: 10px; }
-		
-		/* 툴팁 스타일 */
-		.tooltip { position: relative; display: inline-flex; align-items: center; justify-content: center; cursor: help; background-color: #6c757d; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 11px; margin-left: 5px; font-weight: bold; }
-		.tooltip .tooltiptext { visibility: hidden; width: 280px; background-color: #333; color: #fff; text-align: left; border-radius: 6px; padding: 10px; position: absolute; z-index: 10; bottom: 130%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-weight: normal; line-height: 1.4; font-size: 12px; box-shadow: 0px 4px 6px rgba(0,0,0,0.3); }
-		.tooltip .tooltiptext::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
-		.tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+	  .input-group { margin-bottom: 12px; }
+	  label { display: inline-block; width: 160px; font-weight: bold; }
 
-		.top-controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; padding: 15px; background: #e9ecef; border-radius: 5px; }
+	  input[type="number"], 
+	  select, 
+	  input[type="text"] { 
+		padding: 5px; 
+		border: 1px solid #ccc; 
+		border-radius: 4px; 
+	  }
+
+	  .top-controls { 
+		display: flex; 
+		gap: 10px; 
+		margin-bottom: 20px; 
+		flex-wrap: wrap; 
+		padding: 15px; 
+		background: #e9ecef; 
+		border-radius: 5px; 
+	  }
+
+	  /* =========================================
+		 공통 색상
+		 ========================================= */
+	  /* 청록색 테마 */
+	  .nav-home, .btn-info { background-color: #17a2b8; }
+	  .nav-home:hover, .btn-info:hover { background-color: #138496; }
+
+	  /* 파란색 테마 */
+	  .nav-plan, .btn-primary { background-color: #0056b3; }
+	  .nav-plan:hover, .btn-primary:hover:not(:disabled) { background-color: #004494; }
+
+	  /* 회색 테마 */
+	  .nav-sim, .nav-github, .btn-secondary { background-color: #6c757d; }
+	  .nav-sim:hover, .nav-github:hover, .btn-secondary:hover { background-color: #5a6268; }
+
+	  /* 모든 주요 버튼 텍스트 공통 색상 */
+	  .btn-primary, .btn-success, .btn-danger, .btn-secondary, .btn-info, .btn-capture {
+		color: white;
+	  }
+
+	  /* =========================================
+		 네비게이션
+		 ========================================= */
+	  .nav-menu { 
+		background-color: #f8f9fa; 
+		padding: 12px; 
+		border-radius: 5px; 
+		margin-bottom: 20px; 
+		border: 1px solid #dee2e6; 
+		display: flex; 
+		gap: 10px; 
+		flex-wrap: wrap; 
+	  }
+
+	  .nav-menu a { 
+		text-decoration: none; 
+		padding: 10px 15px; 
+		border-radius: 5px; 
+		font-weight: bold; 
+		color: white; 
+		transition: background-color 0.3s; 
+	  }
+
+	  /* =========================================
+		 버튼
+		 ========================================= */
+	  button { 
+		margin-top: 10px; 
+		padding: 10px 20px; 
+		font-size: 15px; 
+		font-weight: bold; 
+		cursor: pointer; 
+		border: none; 
+		border-radius: 5px; 
+		transition: background-color 0.3s, transform 0.2s ease; 
+		word-break: keep-all; 
+	  }
+
+	  /* 개별 버튼 색상 */
+	  .btn-success { background-color: #28a745; margin-bottom: 15px; }
+	  .btn-success:hover { background-color: #218838; }
+
+	  .btn-danger { background-color: #dc3545; }
+	  .btn-danger:hover { background-color: #c82333; }
+
+	  .btn-capture {
+		background-color: #ff8c00;
+		border: 1px solid #e67e22;
+		font-size: 16px; /* 옆의 버튼보다 눈에 띄게 */
+		box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+	  }
+	  .btn-capture:hover:not(:disabled) {
+		background-color: #e67e22;
+		transform: translateY(-2px);
+		box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+	  }
+	  
+	  /* disabled 상태 공통 */
+	  .btn-primary:disabled { 
+		background-color: #a0c4e8; 
+		cursor: not-allowed; 
+	  }
+	  .btn-capture:disabled,
+	  .btn-info:disabled {
+		background-color: #e2e8f0;
+		color: #94a3b8;
+		border: 1px solid #cbd5e1;
+		box-shadow: none;
+		cursor: not-allowed;
+		transform: none;
+	  }
+
+	  /* =========================================
+		 출력 영역
+		 ========================================= */
+	  #capture-area { 
+		background-color: #ffffff; 
+		padding: 20px; 
+		border-radius: 8px; 
+		border: 1px solid #d1d5db; 
+		margin-top: 20px; 
+	  }
+
+	  #text-output { 
+		white-space: pre-wrap; 
+		background: #f4f6f9; 
+		padding: 20px; 
+		border-radius: 8px; 
+		font-family: monospace; 
+		font-size: 14px; 
+		border: 1px solid #e2e8f0; 
+	  }
+
+	  #plot-output { margin-top: 20px; }
+
+	  /* =========================================
+		 기간별 폼 영역
+		 ========================================= */
+	  .period-row {
+		background-color: #f8f9fa;
+		border: 1px solid #dee2e6;
+		border-radius: 8px;
+		padding: 15px;
+		margin-bottom: 15px;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	  }
+
+	  /* Flex 컨테이너 공통 */
+	  .period-header, 
+	  .period-targets, 
+	  .period-options, 
+	  .ceiling-wrapper {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+	  }
+
+	  .period-header { flex-wrap: nowrap; }
+
+	  .period-header strong,
+	  .period-header .p_system,
+	  .period-header .remove-btn { flex-shrink: 0; }
+
+	  .period-header strong { font-size: 16px; margin-right: 0; }
+	  .period-header .p_memo { flex-grow: 1; flex-shrink: 1; min-width: 40px; }
+	  .period-header .p_system { font-weight: bold; background-color: #fff; }
+	  .period-header .remove-btn { margin: 0; padding: 6px 12px; }
+
+	  /* label 공통 */
+	  .period-targets label, 
+	  .period-options label,
+	  .ceiling-wrapper label {
+		display: inline-flex;
+		align-items: center;
+		margin: 0;
+		white-space: nowrap;
+	  }
+
+	  /* input[type="number"] 공통 */
+	  .period-targets input[type="number"],
+	  .ceiling-th-container input { 
+		width: 60px; 
+		margin: 0 5px; 
+	  }
+
+	  .ceiling-wrapper {
+		background-color: #e9ecef;
+		padding: 10px;
+		border-radius: 6px;
+	  }
+	  .ceiling-th-container { display: inline-flex; align-items: center; }
+
+	  /* =========================================
+		 툴팁
+		 ========================================= */
+	  .tooltip {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		cursor: help;
+		background-color: #6c757d;
+		color: white; 
+		border-radius: 50%;
+		width: 16px; 
+		height: 16px;
+		font-size: 11px;
+		margin-left: 5px;
+		font-weight: bold; 
+	  }
+
+	  .tooltip .tooltiptext { 
+		visibility: hidden; 
+		width: 280px; 
+		background-color: #333; 
+		color: #fff; 
+		text-align: left; 
+		border-radius: 6px; 
+		padding: 10px; 
+		position: absolute; 
+		z-index: 10; 
+		bottom: 130%; 
+		left: 50%; 
+		transform: translateX(-50%); 
+		opacity: 0; 
+		transition: opacity 0.3s; 
+		font-weight: normal; 
+		line-height: 1.4; 
+		font-size: 12px; 
+		box-shadow: 0px 4px 6px rgba(0,0,0,0.3); 
+		white-space: normal; 
+	  }
+
+	  .tooltip .tooltiptext::after { 
+		content: ""; 
+		position: absolute; 
+		top: 100%; 
+		left: 50%; 
+		margin-left: -5px; 
+		border-width: 5px; 
+		border-style: solid; 
+		border-color: #333 transparent transparent transparent; 
+	  }
+
+	  .tooltip:hover .tooltiptext { 
+		visibility: visible; 
+		opacity: 1; 
+	  }
+	  
+	  /* =========================================
+		 모바일 최적화
+		 ========================================= */
+	  body, html {
+		overflow-x: hidden;
+	  }
+
+	  @media (max-width: 768px) {
+		body { padding: 10px; }
+		
+		/* 입력 그룹 및 라벨이 세로로 배치되도록 수정 */
+		.input-group { display: flex; flex-direction: column; align-items: flex-start; }
+		label { width: 100%; margin-bottom: 5px; white-space: normal; }
+		
+		/* 모든 인풋 박스가 화면 너비에 맞게 축소되도록 강제 적용 */
+		input[type="text"], 
+		input[type="number"], 
+		select { 
+		  width: 100% !important; 
+		  max-width: 100%; 
+		  box-sizing: border-box; 
+		}
+
+		/* 기간 설정 폼 레이아웃 유연화 */
+		.period-header { flex-wrap: wrap; }
+		.period-header .p_memo { width: 100%; margin-top: 5px; }
+		.ceiling-wrapper, .ceiling-th-container { display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
+		.ceiling-th-container input { width: 100% !important; margin: 5px 0 0 0; }
+		
+		/* 모바일에서 툴팁이 화면 밖으로 삐져나가는 현상 방지 (화면 중앙 팝업 형태로 변경) */
+		.tooltip .tooltiptext {
+		  position: fixed;
+		  top: 50%;
+		  left: 50%;
+		  transform: translate(-50%, -50%); /* 화면 정중앙에 배치 */
+		  width: 85%; 
+		  max-width: 320px;
+		  bottom: auto;
+		  z-index: 9999; /* 다른 요소들보다 무조건 위에 오도록 설정 */
+		  box-shadow: 0px 4px 15px rgba(0,0,0,0.4);
+		}
+		
+		.tooltip .tooltiptext::after {
+		  display: none; /* 중앙 팝업 형태이므로 말풍선 꼬리는 숨김 처리 */
+		}
+	  }
 	</style>
 </head>
 <body>
@@ -107,12 +346,12 @@
 		<select id="prune-threshold" class="save-target">
 			<option value="0">사용 안 함 (가장 정확, 가장 느림)</option>
 			<option value="1e-12" selected>1e-12 (매우 정확, 1조분의 1 이하 확률 버림)</option>
-			<option value="1e-8">1e-8 (정확하며 비교적 빠름, 1억분의 1 이하 확률 버림)</option>
+			<option value="1e-8">1e-8 (정확, 1억분의 1 이하 확률 버림)</option>
 		</select>
 		<div class="tooltip">?<span class="tooltiptext">극단적으로 낮은 확률의 경우의 수를 버려 연산 속도를 높입니다. 정확도를 우선시한다면 1e-12, 연산량이 많은 경우 1e-8을 권장합니다.</span></div>
 		<br>
 		<label style="width: auto; margin-left: 10px;">시작 호출차지(신규방식):</label>
-		<input type="number" id="init-charge" class="save-target" value="0" min="0" max="199" style="width: 60px;">
+		<input type="number" id="init-charge" class="save-target" value="0" min="0" max="199" style="max-width: 60px;">
 		<div class="tooltip">?<span class="tooltiptext">시뮬레이션 시작 전 미리 보유한 호출차지 스택입니다.</span></div>
 	</div>
 
@@ -124,15 +363,15 @@
 
 	<div class="input-group">
 		<label for="percentiles">관찰 행운도(%):</label>
-		<input type="text" id="percentiles" class="save-target" value="1, 5, 10, 25, 50, 75, 90, 95, 99" style="width: 250px;" placeholder="쉼표(,)로 구분">
+		<input type="text" id="percentiles" class="save-target" value="1, 5, 10, 25, 50, 75, 90, 95, 99" style="max-width: 250px;" placeholder="쉼표(,)로 구분">
 	</div>
 	
 	<button id="run-btn" class="btn-primary" style="width: 100%; font-size: 18px; padding: 15px;" disabled>시뮬레이션 준비 중...</button>
 	
 	<!-- 캡처 및 출력 영역 -->
-	<div style="margin-top: 25px; display: flex; gap: 10px; align-items: center;">
-		<button id="save-img-btn" class="btn-capture" disabled onclick="saveAsImage()">📷 결과 이미지로 저장</button>
-		<button id="toggle-plot-btn" class="btn-info" disabled style="padding: 12px 20px;">이산 확률 분포(PMF) 보기</button>
+	<div style="margin-top: 25px; display: flex; gap: 10px; align-items: center; width: 100%;">
+		<button id="save-img-btn" class="btn-capture" disabled onclick="saveAsImage()">결과 이미지로 저장</button>
+		<button id="toggle-plot-btn" class="btn-info" disabled>이산 확률 분포(PMF) 보기</button>
 	</div>
 
 	<div id="capture-area">
@@ -154,30 +393,30 @@
  * @returns {Object} { 백분위수: 가챠 횟수 } 형태의 객체 반환
  */
 function getPercentiles(dist, pctList) {
-    // 1. 관찰할 % 값을 소수점 확률로 변환 (예: 50% -> 0.5)
-    const pcts = {};
-    pctList.forEach(k => pcts[k] = k / 100.0);
-    
-    const res = {};
-    let cum = 0.0; // 누적 확률
-    
-    // 오름차순으로 정렬하여 순차적으로 탐색
-    const sortedKeys = [...pctList].sort((a, b) => a - b);
-    let kIdx = 0;
-    
-    for (let i = 0; i < dist.length; i++) {
-        cum += dist[i]; 
-        
-        // 누적 확률이 관찰 행운도를 넘어서는 순간의 뽑기 횟수를 기록
-        while (kIdx < sortedKeys.length && cum >= pcts[sortedKeys[kIdx]]) {
-            res[sortedKeys[kIdx]] = i;
-            kIdx++;
-        }
-        
-        // 모든 관찰 대상을 다 찾았다면 계산을 조기 종료
-        if (kIdx >= sortedKeys.length) break;
-    }
-    return res;
+	// 1. 관찰할 % 값을 소수점 확률로 변환 (예: 50% -> 0.5)
+	const pcts = {};
+	pctList.forEach(k => pcts[k] = k / 100.0);
+	
+	const res = {};
+	let cum = 0.0; // 누적 확률
+	
+	// 오름차순으로 정렬하여 순차적으로 탐색
+	const sortedKeys = [...pctList].sort((a, b) => a - b);
+	let kIdx = 0;
+	
+	for (let i = 0; i < dist.length; i++) {
+		cum += dist[i]; 
+		
+		// 누적 확률이 관찰 행운도를 넘어서는 순간의 뽑기 횟수를 기록
+		while (kIdx < sortedKeys.length && cum >= pcts[sortedKeys[kIdx]]) {
+			res[sortedKeys[kIdx]] = i;
+			kIdx++;
+		}
+		
+		// 모든 관찰 대상을 다 찾았다면 계산을 조기 종료
+		if (kIdx >= sortedKeys.length) break;
+	}
+	return res;
 }
 
 /**
@@ -191,25 +430,25 @@ function getPercentiles(dist, pctList) {
  * @returns {number[]} 합성된 새로운 확률 분포 배열
  */
 function convolveDists(dist1, dist2, pruneThreshold = 1e-8) {
-    if (!dist1 || dist1.length === 0) return dist2;
-    if (!dist2 || dist2.length === 0) return dist1;
+	if (!dist1 || dist1.length === 0) return dist2;
+	if (!dist2 || dist2.length === 0) return dist1;
 
-    const res = new Array(dist1.length + dist2.length - 1).fill(0.0);
+	const res = new Array(dist1.length + dist2.length - 1).fill(0.0);
 
-    for (let i = 0; i < dist1.length; i++) {
-        const p1 = dist1[i];
-        // 너무 희박한 확률은 계산 속도를 위해 (설정에 따라) 가치지기 수행
-        if (p1 < pruneThreshold) continue; 
+	for (let i = 0; i < dist1.length; i++) {
+		const p1 = dist1[i];
+		// 너무 희박한 확률은 계산 속도를 위해 (설정에 따라) 가치지기 수행
+		if (p1 < pruneThreshold) continue; 
 
-        for (let j = 0; j < dist2.length; j++) {
-            const p2 = dist2[j];
-            if (p2 < pruneThreshold) continue;
+		for (let j = 0; j < dist2.length; j++) {
+			const p2 = dist2[j];
+			if (p2 < pruneThreshold) continue;
 
-            // 독립 시행이므로 두 확률을 곱해서 해당 총합(i+j) 횟수의 확률에 누적
-            res[i + j] += p1 * p2; 
-        }
-    }
-    return res;
+			// 독립 시행이므로 두 확률을 곱해서 해당 총합(i+j) 횟수의 확률에 누적
+			res[i + j] += p1 * p2; 
+		}
+	}
+	return res;
 }
 
 /**
@@ -228,232 +467,232 @@ function convolveDists(dist1, dist2, pruneThreshold = 1e-8) {
  * @returns {Object} { avgPulls: 순소모 가챠횟수, avgEligma: 평균 획득 엘리그마, avgEleph: 평균 획득 목표 엘레프, pullsDist: 가챠 횟수 분포, endCDist: 잔여 호출차지 스택 분포 } 형태의 객체 반환
  */
 function simulatePullsToTarget(params) {
-    const {
-        nTargets, dDupes, systemType = "new", isFes = false, hasFree100 = false,
-        is10Pull = true, useCeiling = false, ceilingTh = 150,
-        initCDist = null, pruneThreshold = 1e-8
-    } = params;
+	const {
+		nTargets, dDupes, systemType = "new", isFes = false, hasFree100 = false,
+		is10Pull = true, useCeiling = false, ceilingTh = 150,
+		initCDist = null, pruneThreshold = 1e-8
+	} = params;
 
-    // 기본 확률 세팅
-    const pPickup = 0.007; // 픽업 획득 확률 0.7%
-    const pOffIndiv = isFes ? 0.001 : 0.0; // 페스 기간 픽뚫 페스캐 개별 확률
-    const p3StarTotal = isFes ? 0.06 : 0.03; // 전체 3성 확률 (일반 3%, 페스 6%)
-    const p2Star = 0.185; // 2성 확률 18.5%
-    const p1Star = 1.0 - p3StarTotal - p2Star; // 나머지가 1성 확률
-    
-    const targetPickups = nTargets + dDupes;
-    
-    // 최대 필요 가챠 횟수 = 전부 천장을 친다고 가정했을 때의 횟수
-    const maxPulls = targetPickups * 200 + (is10Pull ? 10 : 0);
-    
-    let pullsDist = new Array(maxPulls + 1).fill(0.0);
-    let totalEligma = 0.0;
-    let totalEleph = 0.0;
-    let endCDist = new Map(); // 다음 픽업으로 이월될 호출차지 분포
+	// 기본 확률 세팅
+	const pPickup = 0.007; // 픽업 획득 확률 0.7%
+	const pOffIndiv = isFes ? 0.001 : 0.0; // 페스 기간 픽뚫 페스캐 개별 확률
+	const p3StarTotal = isFes ? 0.06 : 0.03; // 전체 3성 확률 (일반 3%, 페스 6%)
+	const p2Star = 0.185; // 2성 확률 18.5%
+	const p1Star = 1.0 - p3StarTotal - p2Star; // 나머지가 1성 확률
+	
+	const targetPickups = nTargets + dDupes;
+	
+	// 최대 필요 가챠 횟수 = 전부 천장을 친다고 가정했을 때의 횟수
+	const maxPulls = targetPickups * 200 + (is10Pull ? 10 : 0);
+	
+	let pullsDist = new Array(maxPulls + 1).fill(0.0);
+	let totalEligma = 0.0;
+	let totalEleph = 0.0;
+	let endCDist = new Map(); // 다음 픽업으로 이월될 호출차지 분포
 
-    // ==========================================
-    // 1. 기존 가챠 시스템 연산
-    // ==========================================
-    if (systemType === "old") {
-        // dp: 현재 상태를 저장하는 평행 우주(경우의 수)
+	// ==========================================
+	// 1. 기존 가챠 시스템 연산
+	// ==========================================
+	if (systemType === "old") {
+		// dp: 현재 상태를 저장하는 평행 우주(경우의 수)
 		// Map(획득한 캐릭터 수 => 그 상태가 될 확률) 구조임
-        let dp = new Map();
-        dp.set(0, 1.0); // 0명 획득 상태에서 확률 100%(1.0)로 시작
+		let dp = new Map();
+		dp.set(0, 1.0); // 0명 획득 상태에서 확률 100%(1.0)로 시작
 
-        for (let i = 1; i <= maxPulls; i++) {
-            if (dp.size === 0) break; // 모든 우주에서 목표를 달성했다면 조기 종료
-            
-            let newDp = new Map();
-            const isSpark = (i % 200 === 0) ? 1 : 0; // 천장 도달 여부를 나타내는 플래그
-            const isGuaranteed2Star = is10Pull && (i % 10 === 0); // 10연차 최소 2성 보장 여부를 나타내는 플래그
-            
-            for (let [p, prob] of dp.entries()) {
-                const remFes = Math.max(0, nTargets - p - 1); // 아직 뽑지 못한 페스캐(명함) 수
-                const ownFes = Math.max(0, nTargets - 1) - remFes; // 이미 뽑은 페스캐(명함) 수
-                
-                const pBanner = pPickup; // 현재 배너의 픽업캐 확률
-                const pOffTgt = isFes ? remFes * pOffIndiv : 0.0; // 아직 뽑지 못한 페스캐의 명함을 픽뚫로 얻을 확률, 페스 가챠가 아니라면 픽뚫 고려하지 않으므로 0%로 설정
-                const pOwnFes = isFes ? ownFes * pOffIndiv : 0.0; // 이미 명함이 있는 페스캐를 픽뚫로 중복획득할 확률, 페스 가챠가 아니라면 픽뚫 고려하지 않으므로 0%로 설정
-                const pTrash = 1.0 - pBanner - pOffTgt - pOwnFes; // 꽝 확률
-                
-                // 10연차 2성 보장 적용 (2성 보장시 1성 확률은 0%로 변경됨)
-                const p2Act = isGuaranteed2Star ? (1.0 - p3StarTotal) : p2Star;
-                const p1Act = isGuaranteed2Star ? 0.0 : p1Star;
-                
-                // 획득 자원 기댓값 계산 (우선 모든 3성을 중복으로 가정하고 계산)
+		for (let i = 1; i <= maxPulls; i++) {
+			if (dp.size === 0) break; // 모든 우주에서 목표를 달성했다면 조기 종료
+			
+			let newDp = new Map();
+			const isSpark = (i % 200 === 0) ? 1 : 0; // 천장 도달 여부를 나타내는 플래그
+			const isGuaranteed2Star = is10Pull && (i % 10 === 0); // 10연차 최소 2성 보장 여부를 나타내는 플래그
+			
+			for (let [p, prob] of dp.entries()) {
+				const remFes = Math.max(0, nTargets - p - 1); // 아직 뽑지 못한 페스캐(명함) 수
+				const ownFes = Math.max(0, nTargets - 1) - remFes; // 이미 뽑은 페스캐(명함) 수
+				
+				const pBanner = pPickup; // 현재 배너의 픽업캐 확률
+				const pOffTgt = isFes ? remFes * pOffIndiv : 0.0; // 아직 뽑지 못한 페스캐의 명함을 픽뚫로 얻을 확률, 페스 가챠가 아니라면 픽뚫 고려하지 않으므로 0%로 설정
+				const pOwnFes = isFes ? ownFes * pOffIndiv : 0.0; // 이미 명함이 있는 페스캐를 픽뚫로 중복획득할 확률, 페스 가챠가 아니라면 픽뚫 고려하지 않으므로 0%로 설정
+				const pTrash = 1.0 - pBanner - pOffTgt - pOwnFes; // 꽝 확률
+				
+				// 10연차 2성 보장 적용 (2성 보장시 1성 확률은 0%로 변경됨)
+				const p2Act = isGuaranteed2Star ? (1.0 - p3StarTotal) : p2Star;
+				const p1Act = isGuaranteed2Star ? 0.0 : p1Star;
+				
+				// 획득 자원 기댓값 계산 (우선 모든 3성을 중복으로 가정하고 계산)
 				// 계산을 효율적으로 하기 위해 "이번에 나온 3성은 무조건 중복"이라고 일단 가정하고,
 				// 무조건 엘리그마 50개를 획득하는 것으로 계산.
 				// (나중에, 엘리그마가 지급되지 않는 명함 개수만큼 50개를 다시 빼줘서 오차 수정)
-                const eEligma = (p3StarTotal * 50) + (p2Act * 10) + (p1Act * 1);
-                const eEleph = (pBanner * 100) + (pOwnFes * 30); // 픽뚫 명함은 초회 엘레프 지급이 없으므로 pOffTgt에 대해선 합산하지 않음
-                
+				const eEligma = (p3StarTotal * 50) + (p2Act * 10) + (p1Act * 1);
+				const eEleph = (pBanner * 100) + (pOwnFes * 30); // 픽뚫 명함은 초회 엘레프 지급이 없으므로 pOffTgt에 대해선 합산하지 않음
+				
 				// 현재 평행우주 확률에 곱해서 총 기대 획득량을 누적
-                totalEligma += prob * eEligma;
-                totalEleph += prob * eEleph;
-                
+				totalEligma += prob * eEligma;
+				totalEleph += prob * eEleph;
+				
 				// 천장에 도달하면 확정 보상을 가챠와는 별개로 추가 반영(교환 방식이므로). 역시 우선은 중복으로 가정하고, 추후 명함 개수만큼 50개씩 엘리그마를 빼서 오차 수정
-                if (isSpark) {
-                    totalEligma += prob * 50;
-                    totalEleph += prob * 100;
-                }
-                
+				if (isSpark) {
+					totalEligma += prob * 50;
+					totalEleph += prob * 100;
+				}
+				
 				// 10연차/고의천장전략 사용 시, 목표 달성 이후 마르코프 체인의 상태 공간이 불필요하게 확장되지 않도록 상한선 적용(p값이 목표를 달성한 시점부터는 종료 조건에 영향을 미치지 않기 때문에 달성도를 불필요하게 추적하여 연산량을 늘릴 필요가 없음)
 				// *엘리그마/엘레프 획득량은 상한선의 적용 여부와 상관 없이 윗부분에서 정확하게 계산됨
-                // 가챠 결과에 따른 4가지 갈래길
-                const paths = [
-                    { nxtP: Math.min(targetPickups, p + 1 + isSpark), pr: pBanner }, // 픽업 획득
-                    { nxtP: Math.min(targetPickups, p + 1 + isSpark), pr: pOffTgt }, // 픽뚫 명함 획득
-                    { nxtP: Math.min(targetPickups, p + 0 + isSpark), pr: pOwnFes }, // 픽뚫 중복 획득
-                    { nxtP: Math.min(targetPickups, p + 0 + isSpark), pr: pTrash }   // 꽝
-                ];
-                
+				// 가챠 결과에 따른 4가지 갈래길
+				const paths = [
+					{ nxtP: Math.min(targetPickups, p + 1 + isSpark), pr: pBanner }, // 픽업 획득
+					{ nxtP: Math.min(targetPickups, p + 1 + isSpark), pr: pOffTgt }, // 픽뚫 명함 획득
+					{ nxtP: Math.min(targetPickups, p + 0 + isSpark), pr: pOwnFes }, // 픽뚫 중복 획득
+					{ nxtP: Math.min(targetPickups, p + 0 + isSpark), pr: pTrash }   // 꽝
+				];
+				
 				// 갈라진 평행우주들을 다음 턴(newDp)에 저장
-                for (let path of paths) {
-                    if (path.pr > 0) {
-                        const probVal = prob * path.pr;
-                        // 확률이 너무 희박하면 연산 효율화를 위해 가지치기(설정에 따라 기준이 다르게 적용됨)
-                        if (probVal >= pruneThreshold) {
-                            newDp.set(path.nxtP, (newDp.get(path.nxtP) || 0.0) + probVal);
-                        }
-                    }
-                }
-            }
-            
-            // 가챠를 그만둬도 되는지(종료 조건) 판별
-            const keysToRemove = [];
-            for (let [nxtP, pVal] of newDp.entries()) {
-                if (nxtP >= targetPickups) { // 목표치 달성
-                    let canStop = true;
+				for (let path of paths) {
+					if (path.pr > 0) {
+						const probVal = prob * path.pr;
+						// 확률이 너무 희박하면 연산 효율화를 위해 가지치기(설정에 따라 기준이 다르게 적용됨)
+						if (probVal >= pruneThreshold) {
+							newDp.set(path.nxtP, (newDp.get(path.nxtP) || 0.0) + probVal);
+						}
+					}
+				}
+			}
+			
+			// 가챠를 그만둬도 되는지(종료 조건) 판별
+			const keysToRemove = [];
+			for (let [nxtP, pVal] of newDp.entries()) {
+				if (nxtP >= targetPickups) { // 목표치 달성
+					let canStop = true;
 					// 목표를 달성했어도 무료 100연 기간이거나, 10연차 도중이라면 중간에 멈출 수 없음
 					// 무료 100연 기간인 경우, 일찍 목표를 달성했더라도 무료연을 버리지 않을 것이며,
 					// 10연챠 단위로 돌리는 경우, 해당 연챠가 끝날 때까지는 가챠가 돌아가기 때문
-                    if (hasFree100 && i < 100) canStop = false;
-                    else if (is10Pull && (i % 10 !== 0)) canStop = false;
-                    
-                    if (canStop) {
-                        const progress = (i % 200 !== 0) ? (i % 200) : 200;
-                        // 고의 천장 전략 (기준점 이상 진행되었으면 다음 천장까지 무조건 돌림)
-                        if (useCeiling && progress >= ceilingTh && progress < 200) {
-                            // 고의 천장 전략 수행, 멈추지 않고 계속 진행
-                        } else {
+					if (hasFree100 && i < 100) canStop = false;
+					else if (is10Pull && (i % 10 !== 0)) canStop = false;
+					
+					if (canStop) {
+						const progress = (i % 200 !== 0) ? (i % 200) : 200;
+						// 고의 천장 전략 (기준점 이상 진행되었으면 다음 천장까지 무조건 돌림)
+						if (useCeiling && progress >= ceilingTh && progress < 200) {
+							// 고의 천장 전략 수행, 멈추지 않고 계속 진행
+						} else {
 							// 종료 조건이 만족되었으므로, 이 우주(경우의 수)에선 계산 종료
-                            pullsDist[i] += pVal; // 최종 기록에 추가
-                            keysToRemove.push(nxtP); // 계산에서 제외할 우주로 기록
-                        }
-                    }
-                }
-            }
-            
-            keysToRemove.forEach(k => newDp.delete(k)); // 이미 완료된 우주는 계산에서 제외
-            dp = newDp;
-        }
-        endCDist.set(0, 1.0); // 기존 방식은 스택 이월 불가하므로 호출차지는 항상 0으로 끝남
+							pullsDist[i] += pVal; // 최종 기록에 추가
+							keysToRemove.push(nxtP); // 계산에서 제외할 우주로 기록
+						}
+					}
+				}
+			}
+			
+			keysToRemove.forEach(k => newDp.delete(k)); // 이미 완료된 우주는 계산에서 제외
+			dp = newDp;
+		}
+		endCDist.set(0, 1.0); // 기존 방식은 스택 이월 불가하므로 호출차지는 항상 0으로 끝남
 
-    // ==========================================
-    // 2. 신규 가챠 시스템 연산
-    // ==========================================
-    } else {
-        // 초기 호출차지 설정 (없으면 0으로 시작)
+	// ==========================================
+	// 2. 신규 가챠 시스템 연산
+	// ==========================================
+	} else {
+		// 초기 호출차지 설정 (없으면 0으로 시작)
 		// 키 => 값 (획득수_호출차지스택 => 확률) 구조
-        let dp = new Map();
+		let dp = new Map();
 
-        if (!initCDist) {
-            dp.set("0_0", 1.0);
-        } else {
-            for (let [c, prob] of initCDist.entries()) {
-                if (prob >= pruneThreshold) {
-                    dp.set(`0_${c}`, prob); // 호출차지 분포를 인계받아 획득수 0, 호출차지스택 c => 확률 prob 로 설정
-                }
-            }
-        }
-        
-        for (let i = 1; i <= maxPulls; i++) {
-            if (dp.size === 0) break;
-            
+		if (!initCDist) {
+			dp.set("0_0", 1.0);
+		} else {
+			for (let [c, prob] of initCDist.entries()) {
+				if (prob >= pruneThreshold) {
+					dp.set(`0_${c}`, prob); // 호출차지 분포를 인계받아 획득수 0, 호출차지스택 c => 확률 prob 로 설정
+				}
+			}
+		}
+		
+		for (let i = 1; i <= maxPulls; i++) {
+			if (dp.size === 0) break;
+			
 			// [누적모집횟수 보상] - 자잘한 재화는 제외하고, 엘리그마와 10연챠 티켓만 반영 예정
 			// 우선 해당 횟수 도달 시점의 전체 확률(살아있는 우주들의 합)만큼 엘리그마 보상 반영
-            let currentProbSum = 0.0;
-            for (let prob of dp.values()) currentProbSum += prob;
-            
-            if (i === 30) totalEligma += currentProbSum * 10;
-            else if (i === 110) totalEligma += currentProbSum * 20;
-            else if (i === 230) totalEligma += currentProbSum * 10;
-            else if (i === 310) totalEligma += currentProbSum * 20;
-            
-            const isGuaranteed2Star = is10Pull && (i % 10 === 0);
-            let nextDp = new Map();
-            
-            for (let [stateKey, prob] of dp.entries()) {
-                // 문자열 형태의 stateKey를 분리하여 숫자로 변환
-                const [p, c] = stateKey.split("_").map(Number);
-                const cNext = c + 1; // 가챠 1회당 호출차지 스택 +1
-                
-                const remFes = Math.max(0, nTargets - p - 1);
-                const ownFes = Math.max(0, nTargets - 1) - remFes;
-                
+			let currentProbSum = 0.0;
+			for (let prob of dp.values()) currentProbSum += prob;
+			
+			if (i === 30) totalEligma += currentProbSum * 10;
+			else if (i === 110) totalEligma += currentProbSum * 20;
+			else if (i === 230) totalEligma += currentProbSum * 10;
+			else if (i === 310) totalEligma += currentProbSum * 20;
+			
+			const isGuaranteed2Star = is10Pull && (i % 10 === 0);
+			let nextDp = new Map();
+			
+			for (let [stateKey, prob] of dp.entries()) {
+				// 문자열 형태의 stateKey를 분리하여 숫자로 변환
+				const [p, c] = stateKey.split("_").map(Number);
+				const cNext = c + 1; // 가챠 1회당 호출차지 스택 +1
+				
+				const remFes = Math.max(0, nTargets - p - 1);
+				const ownFes = Math.max(0, nTargets - 1) - remFes;
+				
 				// 사용할 변수 선언 및 초기화
-                let pBanner = 0.0, pOffTgt = 0.0, pOwnFes = 0.0, eEligma = 0.0, eEleph = 0.0;
-                
-                // [호출차지 100] 3성 확정 및 픽업 확률 50%
-                if (cNext === 100) {
+				let pBanner = 0.0, pOffTgt = 0.0, pOwnFes = 0.0, eEligma = 0.0, eEleph = 0.0;
+				
+				// [호출차지 100] 3성 확정 및 픽업 확률 50%
+				if (cNext === 100) {
 					// 호출차지 100회차에서 페스캐 픽뚫 확률이 픽뚫 50% 중 어떻게 분배되어 있는지 알 수 없으므로
 					// (기존처럼 페스 픽뚫 확률 합산 0.9%(각 0.1%)가 유지되고 통상 3성 픽뚫 확률 49.1%일지,
 					//  아니면 균등 비례 확장되어 페스 픽뚫 확률이 약 8.49%(각 0.9434%)로 확대될지 아직 알 수 없으므로,
 					//  보수적으로 가정하여 호출차지 100 시점에서도 페스 픽뚫 확률 합산을 0.9%로 가정한다.)
-                    pBanner = 0.5;
-                    pOffTgt = isFes ? remFes * pOffIndiv : 0.0;
-                    pOwnFes = isFes ? ownFes * pOffIndiv : 0.0;
-                    eEligma = 50.0; // 3성 확정이므로, 일단은 중복으로 가정하여 엘리그마 50개 획득(추후, 목표 명함 개수만큼 다시 빼서 엘리그마 획득량을 정확하게 맞출 예정)
-                    eEleph = (0.5 * 100) + (pOwnFes * 30); // 50% 확률로 픽업캐 엘레프 100개 획득, 거기에 픽뚫로 목표 페스캐를 중복 획득할 확률로 목표 엘레프 30개 얻을 수 있는 점을 반영하여 계산. 픽뚫로 목표 페스캐 명함을 얻은 경우는 별도 엘레프 지급이 없으므로 엘레프 계산에선 합산하지 않음
-                } 
-                // [호출차지 200] 픽업 캐릭터 100% 확정
-                else if (cNext === 200) {
-                    pBanner = 1.0;
-                    eEligma = 50.0; // 3성 확정이므로, 일단은 중복으로 가정하여 엘리그마 50개 획득(추후, 목표 명함 개수만큼 다시 빼서 엘리그마 획득량을 정확하게 맞출 예정)
-                    eEleph = 100.0; // 100% 확률로 픽업캐 엘레프 100개 획득
-                } 
-                // [일반 뽑기]
-                else {
-                    pBanner = pPickup;
-                    pOffTgt = isFes ? remFes * pOffIndiv : 0.0;
-                    pOwnFes = isFes ? ownFes * pOffIndiv : 0.0;
-                    
-                    const p2Act = isGuaranteed2Star ? (1.0 - p3StarTotal) : p2Star;
-                    const p1Act = isGuaranteed2Star ? 0.0 : p1Star;
-                    
-                    eEligma = (p3StarTotal * 50) + (p2Act * 10) + (p1Act * 1);
-                    eEleph = (pBanner * 100) + (pOwnFes * 30); // 50% 확률로 픽업캐 엘레프 100개 획득, 거기에 픽뚫로 목표 페스캐를 중복 획득할 확률로 목표 엘레프 30개 얻을 수 있는 점을 반영하여 계산. 픽뚫로 목표 페스캐 명함을 얻은 경우는 별도 엘레프 지급이 없으므로 엘레프 계산에선 합산하지 않음
-                }
-                
-                const pTrash = 1.0 - pBanner - pOffTgt - pOwnFes; // 꽝 확률
+					pBanner = 0.5;
+					pOffTgt = isFes ? remFes * pOffIndiv : 0.0;
+					pOwnFes = isFes ? ownFes * pOffIndiv : 0.0;
+					eEligma = 50.0; // 3성 확정이므로, 일단은 중복으로 가정하여 엘리그마 50개 획득(추후, 목표 명함 개수만큼 다시 빼서 엘리그마 획득량을 정확하게 맞출 예정)
+					eEleph = (0.5 * 100) + (pOwnFes * 30); // 50% 확률로 픽업캐 엘레프 100개 획득, 거기에 픽뚫로 목표 페스캐를 중복 획득할 확률로 목표 엘레프 30개 얻을 수 있는 점을 반영하여 계산. 픽뚫로 목표 페스캐 명함을 얻은 경우는 별도 엘레프 지급이 없으므로 엘레프 계산에선 합산하지 않음
+				} 
+				// [호출차지 200] 픽업 캐릭터 100% 확정
+				else if (cNext === 200) {
+					pBanner = 1.0;
+					eEligma = 50.0; // 3성 확정이므로, 일단은 중복으로 가정하여 엘리그마 50개 획득(추후, 목표 명함 개수만큼 다시 빼서 엘리그마 획득량을 정확하게 맞출 예정)
+					eEleph = 100.0; // 100% 확률로 픽업캐 엘레프 100개 획득
+				} 
+				// [일반 뽑기]
+				else {
+					pBanner = pPickup;
+					pOffTgt = isFes ? remFes * pOffIndiv : 0.0;
+					pOwnFes = isFes ? ownFes * pOffIndiv : 0.0;
+					
+					const p2Act = isGuaranteed2Star ? (1.0 - p3StarTotal) : p2Star;
+					const p1Act = isGuaranteed2Star ? 0.0 : p1Star;
+					
+					eEligma = (p3StarTotal * 50) + (p2Act * 10) + (p1Act * 1);
+					eEleph = (pBanner * 100) + (pOwnFes * 30); // 50% 확률로 픽업캐 엘레프 100개 획득, 거기에 픽뚫로 목표 페스캐를 중복 획득할 확률로 목표 엘레프 30개 얻을 수 있는 점을 반영하여 계산. 픽뚫로 목표 페스캐 명함을 얻은 경우는 별도 엘레프 지급이 없으므로 엘레프 계산에선 합산하지 않음
+				}
 				
-                totalEligma += prob * eEligma;
-                totalEleph += prob * eEleph;
-                
+				const pTrash = 1.0 - pBanner - pOffTgt - pOwnFes; // 꽝 확률
+				
+				totalEligma += prob * eEligma;
+				totalEleph += prob * eEleph;
+				
 				// 10연차 모드에서 목표 달성 이후 마르코프 체인의 상태 공간이 불필요하게 확장되지 않도록 상한선 적용(p값이 목표를 달성한 시점부터는 종료 조건에 영향을 미치지 않기 때문에 달성도를 불필요하게 추적하여 연산량을 늘릴 필요가 없음)
 				// *엘리그마/엘레프 획득량은 상한선의 적용 여부와 상관 없이 정확하게 계산됨
-                const paths = [
-                    { nxtP: Math.min(targetPickups, p + 1), nxtC: 0, pr: pBanner }, // 픽업 획득시 호출차지 초기화 (nxtC: 0)
-                    { nxtP: Math.min(targetPickups, p + 1), nxtC: cNext, pr: pOffTgt }, // 픽뚫로 목표를 획득했더라도 호출차지는 초기화되지 않음
-                    { nxtP: Math.min(targetPickups, p), nxtC: cNext, pr: pOwnFes }, // 픽뚫로 목표 중복 획득시에는 목표 달성도를 올리지 않음(엘레프 계산은 위에서 이미 반영됨)
-                    { nxtP: Math.min(targetPickups, p), nxtC: cNext, pr: pTrash }
-                ];
-                
-                for (let path of paths) {
-                    if (path.pr > 0) {
-                        const probVal = prob * path.pr;
-                        if (probVal >= pruneThreshold) {
-                            const newKey = `${path.nxtP}_${path.nxtC}`;
-                            nextDp.set(newKey, (nextDp.get(newKey) || 0.0) + probVal);
-                        }
-                    }
-                }
-            }
-            
-            // 종료 조건 판별
-            const keysToRemove = [];
+				const paths = [
+					{ nxtP: Math.min(targetPickups, p + 1), nxtC: 0, pr: pBanner }, // 픽업 획득시 호출차지 초기화 (nxtC: 0)
+					{ nxtP: Math.min(targetPickups, p + 1), nxtC: cNext, pr: pOffTgt }, // 픽뚫로 목표를 획득했더라도 호출차지는 초기화되지 않음
+					{ nxtP: Math.min(targetPickups, p), nxtC: cNext, pr: pOwnFes }, // 픽뚫로 목표 중복 획득시에는 목표 달성도를 올리지 않음(엘레프 계산은 위에서 이미 반영됨)
+					{ nxtP: Math.min(targetPickups, p), nxtC: cNext, pr: pTrash }
+				];
+				
+				for (let path of paths) {
+					if (path.pr > 0) {
+						const probVal = prob * path.pr;
+						if (probVal >= pruneThreshold) {
+							const newKey = `${path.nxtP}_${path.nxtC}`;
+							nextDp.set(newKey, (nextDp.get(newKey) || 0.0) + probVal);
+						}
+					}
+				}
+			}
+			
+			// 종료 조건 판별
+			const keysToRemove = [];
 			const ticketMilestones = [70, 130, 150, 170, 330, 350, 370]
-            
+			
 			// 무료 100회 모집 / 누적모집보상으로 얻은 티켓 갯수에 따라 최소 가챠 횟수를 동적으로 계산
 			// 무료 100회 모집 기간에는 목표를 조기달성하더라도 나머지 무료 모집 횟수를 모두 사용할 것이며,
 			// 누적모집보상으로 얻은 10회 모집 티켓은 해당 픽업에서 즉시 사용하는 것으로 가정하기 때문.
@@ -463,105 +702,105 @@ function simulatePullsToTarget(params) {
 			//  다음 기간으로 티켓 이월)
 			let forcedPull = hasFree100 ? 100 : 0;
 			for (let m of ticketMilestones) {
-                if (i >= m) {
-                    maxForcedPull = Math.max(forcedPull, m) + 10;
-                }
-            }
+				if (i >= m) {
+					maxForcedPull = Math.max(forcedPull, m) + 10;
+				}
+			}
 			
-            for (let [stateKey, pVal] of nextDp.entries()) {
-                const [nxtP, nxtC] = stateKey.split("_").map(Number);
-                
-                if (nxtP >= targetPickups) { // 목표치 달성
-                    let canStop = true;
+			for (let [stateKey, pVal] of nextDp.entries()) {
+				const [nxtP, nxtC] = stateKey.split("_").map(Number);
+				
+				if (nxtP >= targetPickups) { // 목표치 달성
+					let canStop = true;
 					
 					// 동적으로 계산된 최소 모집 횟수(무료 100연 + 누적모집보상 티켓들)에 도달하지 못했다면 중단 불가
 					// 또한 10연챠 단위로 돌리는 경우, 해당 연챠가 끝날 때까지는 가챠가 돌아감
-                    if (i < forcedPull) canStop = false;
-                    else if (is10Pull && (i % 10 !== 0)) canStop = false;
-                    
-                    if (canStop) {
-                        pullsDist[i] += pVal;
-                        // 다음 픽업으로 이월하기 위해 종료 시점의 호출차지 분포를 기록해둠
-                        endCDist.set(nxtC, (endCDist.get(nxtC) || 0.0) + pVal);
-                        keysToRemove.push(stateKey);
-                    }
-                }
-            }
-            
-            keysToRemove.forEach(k => nextDp.delete(k));
-            dp = nextDp;
-        }
-        
-        // 소수점 계산 누적 오차를 잡아주기 위해 정규화
-        let totalEndCProb = 0.0;
-        for (let p of endCDist.values()) totalEndCProb += p;
-        
-        if (totalEndCProb > 0) {
-            let normalizedCDist = new Map();
-            for (let [c, p] of endCDist.entries()) {
-                normalizedCDist.set(c, p / totalEndCProb);
-            }
-            endCDist = normalizedCDist;
-        } else {
-            endCDist = initCDist ? new Map(initCDist) : new Map([[0, 1.0]]);
-        }
-    }
-    
-    // ---------------------------------------------------------
-    // 3. 엘리그마 재계산 및 무료 100회 모집 / 누적모집티켓 반영
-    // ---------------------------------------------------------
-    // 아까 위에서 "모든 학생 획득을 중복으로 가정"하고 엘리그마를 50개씩 다 줬기 때문에,
+					if (i < forcedPull) canStop = false;
+					else if (is10Pull && (i % 10 !== 0)) canStop = false;
+					
+					if (canStop) {
+						pullsDist[i] += pVal;
+						// 다음 픽업으로 이월하기 위해 종료 시점의 호출차지 분포를 기록해둠
+						endCDist.set(nxtC, (endCDist.get(nxtC) || 0.0) + pVal);
+						keysToRemove.push(stateKey);
+					}
+				}
+			}
+			
+			keysToRemove.forEach(k => nextDp.delete(k));
+			dp = nextDp;
+		}
+		
+		// 소수점 계산 누적 오차를 잡아주기 위해 정규화
+		let totalEndCProb = 0.0;
+		for (let p of endCDist.values()) totalEndCProb += p;
+		
+		if (totalEndCProb > 0) {
+			let normalizedCDist = new Map();
+			for (let [c, p] of endCDist.entries()) {
+				normalizedCDist.set(c, p / totalEndCProb);
+			}
+			endCDist = normalizedCDist;
+		} else {
+			endCDist = initCDist ? new Map(initCDist) : new Map([[0, 1.0]]);
+		}
+	}
+	
+	// ---------------------------------------------------------
+	// 3. 엘리그마 재계산 및 무료 100회 모집 / 누적모집티켓 반영
+	// ---------------------------------------------------------
+	// 아까 위에서 "모든 학생 획득을 중복으로 가정"하고 엘리그마를 50개씩 다 줬기 때문에,
 	// 명함 개수(중복으로 뽑지 않은 횟수)만큼은 50개씩 다시 빼줘서 정확하게 계산
-    totalEligma -= nTargets * 50;
-    
+	totalEligma -= nTargets * 50;
+	
 	// 신규 시스템에서 누적모집보상으로 페이백받은 10회 모집 티켓을 썼다면,
 	// 해당 티켓의 사용분만큼 내 청휘석을 안 쓴 것임.
 	// 따라서 무료 제공 회차를 제외하고 '실제 내 청휘석으로 뽑은 횟수'를 계산해줌
-    if (systemType === "new") {
-        const ticketMilestones = [70, 130, 150, 170, 330, 350, 370];
-        let newDist = new Array(pullsDist.length).fill(0.0);
-        
-        for (let idx = 0; idx < pullsDist.length; idx++) {
-            const prob = pullsDist[idx];
-            if (prob < pruneThreshold) continue;
-            
-            let freePulls = 0;
-            for (let m of ticketMilestones) {
-                if (idx > m) freePulls += Math.min(10, idx - m); // 이미 시뮬레이션 과정에서 무료 티켓 사용 구간에서의 10연챠의 불가분성(예: 10회 모집 티켓을 3회분만 사용하고 가챠가 종료되는 것은 불가)을 적용했으므로 실제론 idx - m 값이 10 미만일 수 없겠지만, 안전하게 로직 작성
-            }
-            
-            // 실제 내 청휘석이 소모된 횟수 (순소모 가챠횟수)
-            const paidCost = Math.max(0, idx - freePulls); // 여기서도, 실제론 idx - freePulls 값이 음수일 수 없겠지만 안전하게 로직 작성
-            newDist[paidCost] += prob;
-        }
-        pullsDist = newDist;
-    }
-    
-    // 무료 100연 적용
-    if (hasFree100) {
-        let resD = [];
-        for (let idx = 0; idx < pullsDist.length; idx++) {
-            const prob = pullsDist[idx];
-            const cost = Math.max(0, idx - 100); // 이미 시뮬레이션 과정에서 무료 100연차 진행 중 목표를 달성하더라도 남은 무료 모집 횟수를 모두 사용하도록 되어 있으므로 실제론 idx - 100 값이 음수일 수 없겠지만, 안전하게 로직 작성
-            while (resD.length <= cost) resD.push(0.0);
-            resD[cost] += prob;
-        }
-        pullsDist = resD;
-    }
-    
-    // 실질적인 평균 가챠 횟수 최종 계산
-    let paidAvgPulls = 0.0;
-    for (let i = 0; i < pullsDist.length; i++) {
-        paidAvgPulls += i * pullsDist[i];
-    }
-    
-    return {
-        avgPulls: paidAvgPulls,
-        avgEligma: totalEligma,
-        avgEleph: totalEleph,
-        pullsDist: pullsDist,
-        endCDist: endCDist
-    };
+	if (systemType === "new") {
+		const ticketMilestones = [70, 130, 150, 170, 330, 350, 370];
+		let newDist = new Array(pullsDist.length).fill(0.0);
+		
+		for (let idx = 0; idx < pullsDist.length; idx++) {
+			const prob = pullsDist[idx];
+			if (prob < pruneThreshold) continue;
+			
+			let freePulls = 0;
+			for (let m of ticketMilestones) {
+				if (idx > m) freePulls += Math.min(10, idx - m); // 이미 시뮬레이션 과정에서 무료 티켓 사용 구간에서의 10연챠의 불가분성(예: 10회 모집 티켓을 3회분만 사용하고 가챠가 종료되는 것은 불가)을 적용했으므로 실제론 idx - m 값이 10 미만일 수 없겠지만, 안전하게 로직 작성
+			}
+			
+			// 실제 내 청휘석이 소모된 횟수 (순소모 가챠횟수)
+			const paidCost = Math.max(0, idx - freePulls); // 여기서도, 실제론 idx - freePulls 값이 음수일 수 없겠지만 안전하게 로직 작성
+			newDist[paidCost] += prob;
+		}
+		pullsDist = newDist;
+	}
+	
+	// 무료 100연 적용
+	if (hasFree100) {
+		let resD = [];
+		for (let idx = 0; idx < pullsDist.length; idx++) {
+			const prob = pullsDist[idx];
+			const cost = Math.max(0, idx - 100); // 이미 시뮬레이션 과정에서 무료 100연차 진행 중 목표를 달성하더라도 남은 무료 모집 횟수를 모두 사용하도록 되어 있으므로 실제론 idx - 100 값이 음수일 수 없겠지만, 안전하게 로직 작성
+			while (resD.length <= cost) resD.push(0.0);
+			resD[cost] += prob;
+		}
+		pullsDist = resD;
+	}
+	
+	// 실질적인 평균 가챠 횟수 최종 계산
+	let paidAvgPulls = 0.0;
+	for (let i = 0; i < pullsDist.length; i++) {
+		paidAvgPulls += i * pullsDist[i];
+	}
+	
+	return {
+		avgPulls: paidAvgPulls,
+		avgEligma: totalEligma,
+		avgEleph: totalEleph,
+		pullsDist: pullsDist,
+		endCDist: endCDist
+	};
 }
 
 /**
@@ -569,150 +808,150 @@ function simulatePullsToTarget(params) {
  */
 async function runSimulation() {
 	// 계산 시작 시 버튼 비활성화
-    const runBtn = document.getElementById("run-btn");
-    runBtn.disabled = true;
+	const runBtn = document.getElementById("run-btn");
+	runBtn.disabled = true;
 	document.getElementById("toggle-plot-btn").disabled = true;
-    document.getElementById("save-img-btn").disabled = true;
+	document.getElementById("save-img-btn").disabled = true;
 	// 기존 그래프 삭제
 	Plotly.purge("plot-cumulative")
 	Plotly.purge("plot-regular")
 	
-    const outDiv = document.getElementById("text-output");
-    
-    // UI에서 설정값 읽기
-    let pruneVal = parseFloat(document.getElementById("prune-threshold").value);
+	const outDiv = document.getElementById("text-output");
+	
+	// UI에서 설정값 읽기
+	let pruneVal = parseFloat(document.getElementById("prune-threshold").value);
 	pruneVal = isNaN(pruneVal) ? 1e-8 : pruneVal;
-    let pctStr = document.getElementById("percentiles").value;
-    let pctList = [...new Set(pctStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)))].sort((a, b) => a - b);
-    if (pctList.length === 0) pctList = [1, 5, 10, 25, 50, 75, 90, 95, 99];
-    
-    // 기간별 데이터 배열 만들기
-    const rows = document.querySelectorAll(".period-row");
-    const periods = [];
-    rows.forEach(row => {
-        periods.push({
-            n: parseInt(row.querySelector(".p_targets").value) || 1,
-            d: parseInt(row.querySelector(".p_dupes").value) || 0,
-            system: row.querySelector(".p_system").value,
-            is_fes: row.querySelector(".p_fes").checked,
-            has_free100: row.querySelector(".p_free100").checked,
-            is_10pull: row.querySelector(".p_10pull").checked,
-            use_ceiling: row.querySelector(".p_ceiling").checked,
-            ceiling_th: parseInt(row.querySelector(".p_ceiling_th").value) || 150,
-            memo: row.querySelector(".p_memo").value.trim()
-        });
-    });
+	let pctStr = document.getElementById("percentiles").value;
+	let pctList = [...new Set(pctStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)))].sort((a, b) => a - b);
+	if (pctList.length === 0) pctList = [1, 5, 10, 25, 50, 75, 90, 95, 99];
+	
+	// 기간별 데이터 배열 만들기
+	const rows = document.querySelectorAll(".period-row");
+	const periods = [];
+	rows.forEach(row => {
+		periods.push({
+			n: parseInt(row.querySelector(".p_targets").value) || 1,
+			d: parseInt(row.querySelector(".p_dupes").value) || 0,
+			system: row.querySelector(".p_system").value,
+			is_fes: row.querySelector(".p_fes").checked,
+			has_free100: row.querySelector(".p_free100").checked,
+			is_10pull: row.querySelector(".p_10pull").checked,
+			use_ceiling: row.querySelector(".p_ceiling").checked,
+			ceiling_th: parseInt(row.querySelector(".p_ceiling_th").value) || 150,
+			memo: row.querySelector(".p_memo").value.trim()
+		});
+	});
 
-    outDiv.innerText = "확률 분포를 계산하고 있습니다. 잠시만 기다려주세요...";
-    
-    // 전역 누적 변수 초기화
-    let totalDist = [1.0];
-    let tPulls = 0.0, tEligma = 0.0, tEleph = 0.0;
-    
-    let initC = parseInt(document.getElementById("init-charge").value) || 0; // 사용자가 설정한 초기 호출차지 값 읽어오기
-    initC = Math.max(0, Math.min(199, initC));
-    
-    let currentCDist = new Map();
-    currentCDist.set(initC, 1.0);
-    
-    const totalPeriods = periods.length;
-    
+	outDiv.innerText = "확률 분포를 계산하고 있습니다. 잠시만 기다려주세요...";
+	
+	// 전역 누적 변수 초기화
+	let totalDist = [1.0];
+	let tPulls = 0.0, tEligma = 0.0, tEleph = 0.0;
+	
+	let initC = parseInt(document.getElementById("init-charge").value) || 0; // 사용자가 설정한 초기 호출차지 값 읽어오기
+	initC = Math.max(0, Math.min(199, initC));
+	
+	let currentCDist = new Map();
+	currentCDist.set(initC, 1.0);
+	
+	const totalPeriods = periods.length;
+	
 	let startTime = Date.now()
-    for (let i = 0; i < totalPeriods; i++) {
-        const p = periods[i];
-        
-        runBtn.innerText = `계산 중... (${i}/${totalPeriods})`;
-        
-        await new Promise(resolve => setTimeout(resolve, 10));
-        
-        const res = simulatePullsToTarget({
-            nTargets: p.n, dDupes: p.d, systemType: p.system,
-            isFes: p.is_fes, hasFree100: p.has_free100, is10Pull: p.is_10pull,
-            useCeiling: p.use_ceiling, ceilingTh: p.ceiling_th,
-            initCDist: currentCDist, pruneThreshold: pruneVal
-        });
-        
-        currentCDist = res.endCDist;
-        totalDist = convolveDists(totalDist, res.pullsDist, pruneVal);
-        
-        tPulls += res.avgPulls;
-        tEligma += res.avgEligma;
-        tEleph += res.avgEleph;
-    }
+	for (let i = 0; i < totalPeriods; i++) {
+		const p = periods[i];
+		
+		runBtn.innerText = `계산 중... (${i}/${totalPeriods})`;
+		
+		await new Promise(resolve => setTimeout(resolve, 10));
+		
+		const res = simulatePullsToTarget({
+			nTargets: p.n, dDupes: p.d, systemType: p.system,
+			isFes: p.is_fes, hasFree100: p.has_free100, is10Pull: p.is_10pull,
+			useCeiling: p.use_ceiling, ceilingTh: p.ceiling_th,
+			initCDist: currentCDist, pruneThreshold: pruneVal
+		});
+		
+		currentCDist = res.endCDist;
+		totalDist = convolveDists(totalDist, res.pullsDist, pruneVal);
+		
+		tPulls += res.avgPulls;
+		tEligma += res.avgEligma;
+		tEleph += res.avgEleph;
+	}
 	console.log(`계산 실제 소요 시간: ${Date.now() - startTime - totalPeriods * 10}ms / pruneVal=${pruneVal}`)
 
-    // 결과 텍스트 생성 및 출력
-    const pctRes = getPercentiles(totalDist, pctList);
-    const tPyrox = tPulls * 120;
-    
-    let resultText = `========================================================\n`;
-    resultText +=    `               블루 아카이브 가챠 플래너\n`;
-    resultText +=    `========================================================\n\n`;
-    resultText += `▶ [전체 기간 목록]\n`;
-    
-    periods.forEach((p, i) => {
-        const sysName = p.system === "new" ? "신규" : "기존";
-        const memo = p.memo || `기간 ${i + 1}`;
-        let ceilingText = "";
-        if (p.system === "old") {
-            ceilingText += ` / 고의천장전략: ${p.use_ceiling ? "사용" : "미사용"}`;
-            if (p.use_ceiling) ceilingText += ` (기준점 ${p.ceiling_th}스택)`;
-        }
-        resultText += ` - ${i + 1}. ${memo} (시스템: ${sysName} / 목표명함: ${p.n} / 중복: ${p.d}${ceilingText})\n\n`;
-    });
-    
-    // 행운도(백분위수)에 따른 색상 생성 함수
+	// 결과 텍스트 생성 및 출력
+	const pctRes = getPercentiles(totalDist, pctList);
+	const tPyrox = tPulls * 120;
+	
+	let resultText = `=========================================\n`;
+	resultText +=	 `        블루 아카이브 가챠 플래너\n`;
+	resultText +=	 `=========================================\n\n`;
+	resultText += `▶ [전체 기간 목록]\n`;
+	
+	periods.forEach((p, i) => {
+		const sysName = p.system === "new" ? "신규" : "기존";
+		const memo = p.memo || `기간 ${i + 1}`;
+		let ceilingText = "";
+		if (p.system === "old") {
+			ceilingText += ` / 고의천장전략: ${p.use_ceiling ? "사용" : "미사용"}`;
+			if (p.use_ceiling) ceilingText += ` (기준점 ${p.ceiling_th}스택)`;
+		}
+		resultText += ` - ${i + 1}. ${memo} (시스템: ${sysName} / 목표명함: ${p.n} / 중복: ${p.d}${ceilingText})\n\n`;
+	});
+	
+	// 행운도(백분위수)에 따른 색상 생성 함수
 	// 행운도가 높을수록 초록, 낮을수록 빨강에 가까운 색상을 반환
-    const getLuckColor = (percentile) => {
-        let hue, lightness;
-        if (percentile <= 50) {
-            hue = 120 - (percentile / 50.0) * 80;
-            lightness = 35 - (percentile / 50.0) * 25;
-        } else {
-            hue = 40 - ((percentile - 50.0) / 49.0) * 40;
-            lightness = 10 + ((percentile - 50.0) / 49.0) * 40;
-        }
-        hue = Math.max(0, hue);
-        lightness = Math.min(50, lightness);
-        return `hsl(${hue.toFixed(1)}, 100%, ${lightness.toFixed(1)}%)`;
-    };
-    
-    resultText += `\n▶ [청휘석 필요량 요약]\n`;
-    resultText += `  • 평균 기대 청휘석 소모 : ${tPyrox.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개 (${tPulls.toFixed(2)}뽑)\n`;
-    
-    if (pctRes[95] !== undefined) {
-        const colorCode = getLuckColor(95);
-        resultText += `  • 운 <span style='color:${colorCode}; font-weight:bold;'>하위 5%</span> 기준 청휘석: <span style='color:${colorCode}; font-weight:bold;'>${(pctRes[95] * 120).toLocaleString('ko-KR')} 개</span> (${pctRes[95]}뽑)\n`;
-    }
-    
-    resultText += `\n▶ [상위 %별 필요 청휘석(운 척도)]\n`;
-    Object.keys(pctRes).sort((a,b)=>a-b).forEach(k => {
-        const pyrox = pctRes[k] * 120;
-        const colorCode = getLuckColor(k);
-        const prefix = k <= 50 ? `상위 ${String(k).padStart(2, ' ')}%` : `하위 ${String(100 - k).padStart(2, ' ')}%`;
-        resultText += `  - 운 <span style='color:${colorCode}; font-weight:bold;'>${prefix}</span>: <span style='color:${colorCode}; font-weight:bold;'>${pyrox.toLocaleString('ko-KR').padStart(8, ' ')} 청휘석</span> (${pctRes[k]}뽑)\n`;
-    });
+	const getLuckColor = (percentile) => {
+		let hue, lightness;
+		if (percentile <= 50) {
+			hue = 120 - (percentile / 50.0) * 80;
+			lightness = 35 - (percentile / 50.0) * 25;
+		} else {
+			hue = 40 - ((percentile - 50.0) / 49.0) * 40;
+			lightness = 10 + ((percentile - 50.0) / 49.0) * 40;
+		}
+		hue = Math.max(0, hue);
+		lightness = Math.min(50, lightness);
+		return `hsl(${hue.toFixed(1)}, 100%, ${lightness.toFixed(1)}%)`;
+	};
+	
+	resultText += `\n▶ [청휘석 필요량 요약]\n`;
+	resultText += `  • 평균 기대 청휘석 소모 : ${tPyrox.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개 (${tPulls.toFixed(2)}뽑)\n`;
+	
+	if (pctRes[95] !== undefined) {
+		const colorCode = getLuckColor(95);
+		resultText += `  • 운 <span style='color:${colorCode}; font-weight:bold;'>하위 5%</span> 기준 청휘석: <span style='color:${colorCode}; font-weight:bold;'>${(pctRes[95] * 120).toLocaleString('ko-KR')} 개</span> (${pctRes[95]}뽑)\n`;
+	}
+	
+	resultText += `\n▶ [상위 %별 필요 청휘석(운 척도)]\n`;
+	Object.keys(pctRes).sort((a,b)=>a-b).forEach(k => {
+		const pyrox = pctRes[k] * 120;
+		const colorCode = getLuckColor(k);
+		const prefix = k <= 50 ? `상위 ${String(k).padStart(2, ' ')}%` : `하위 ${String(100 - k).padStart(2, ' ')}%`;
+		resultText += `  - 운 <span style='color:${colorCode}; font-weight:bold;'>${prefix}</span>: <span style='color:${colorCode}; font-weight:bold;'>${pyrox.toLocaleString('ko-KR')} 청휘석</span> (${pctRes[k]}뽑)\n`; // .padStart(8, ' ')
+	});
 	
 	let eligmaRateText = "";
-    let elephRateText = "";
-    
-    if (tPulls > 0.0001) {
-        const eligmaRate = tEligma / tPulls;
-        const elephRate = tEleph / tPulls;
-        eligmaRateText = ` (120청휘석당 ${eligmaRate.toFixed(2)}개)`;
-        elephRateText = ` (120청휘석당 ${elephRate.toFixed(2)}개)`;
-    } else {
-        // 순소모 가챠 횟수가 0인 경우 효율 계산 불가하므로 대체 텍스트 출력
-        eligmaRateText = ` (청휘석 소모 없이 획득)`;
-        elephRateText = ` (청휘석 소모 없이 획득)`;
-    }
+	let elephRateText = "";
+	
+	if (tPulls > 0.0001) {
+		const eligmaRate = tEligma / tPulls;
+		const elephRate = tEleph / tPulls;
+		eligmaRateText = ` (120청휘석당 ${eligmaRate.toFixed(2)}개)`;
+		elephRateText = ` (120청휘석당 ${elephRate.toFixed(2)}개)`;
+	} else {
+		// 순소모 가챠 횟수가 0인 경우 효율 계산 불가하므로 대체 텍스트 출력
+		eligmaRateText = ` (청휘석 소모 없이 획득)`;
+		elephRateText = ` (청휘석 소모 없이 획득)`;
+	}
 	
 	resultText += `\n▶ [부가 재화 획득 기대량]\n`;
-    resultText += `  - 총 획득 엘리그마 : ${tEligma.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개${eligmaRateText}\n`;
-    resultText += `  - 총 획득 목표 엘레프: ${tEleph.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개${elephRateText}\n`;
+	resultText += `  - 엘리그마 : ${tEligma.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개${eligmaRateText}\n`;
+	resultText += `  - 목표 엘레프: ${tEleph.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개${elephRateText}\n`;
 	
 	resultText += `\n▶ [참고사항]\n`;
-	resultText += `  - 평균적으로 무과금 유저는 월평균 약 9,600 청휘석 이상<div class="tooltip">?<span class="tooltiptext">- 일간 미션 : 20*30 = 600
+	resultText += `  - 무과금 유저는 월평균 약 9,600 청휘석 이상<div class="tooltip">?<span class="tooltiptext">- 일간 미션 : 20*30 = 600
 - 주간 미션 : 120*4 = 480
 - 출석 미션 합계 : 450
 - 전술대회 일일 보상(in 1000) : 18*30 = 540
@@ -726,92 +965,172 @@ async function runSimulation() {
 - 이벤트 보상(월평균 1.5회 개최) : 평균 2,000*1.5 = 약 3,000
 - 그 외의 수급처(방송 기념 보상, 리딤 코드, 웹이벤트 보상, 새로운 지역의 도전과제/업적, 메인 스토리/인연 스토리 보상 등)</span></div>,\n`;
 
-	resultText += `  - 월정액 과금 유저는 월평균 약 12,000 청휘석 이상<div class="tooltip">?<span class="tooltiptext">- 월정액 : 392 + 40*30 = 1,592
+	resultText += `  - 월정액 유저는 약 12,000 청휘석 이상<div class="tooltip">?<span class="tooltiptext">- 월정액 : 392 + 40*30 = 1,592
 - 월정액 Half : 176 + 20*30 = 776</span></div> 획득\n`;
 
-resultText += `    (대결전 티켓을 사용하지 않는 경우, 해당분은 제하여 계산)\n`;
+resultText += `(대결전 티켓을 쓰지 않는다면 해당분은 제하여 계산)\n`;
 	
-    resultText += `\n<span style='color: #6c757d;'>https://bagachasimul.github.io/ba-gacha-simul</span>`;
+	resultText += `\n<span style='color: #6c757d;'>https://bagachasimul.github.io/ba-gacha-simul</span>`;
 	
-    outDiv.innerHTML = resultText;
+	outDiv.innerHTML = resultText;
 
-    // ----------------- Plotly 시각화 (청휘석 기준) -----------------
-    let maxIdx = totalDist.length - 1;
-    while (maxIdx > 0 && totalDist[maxIdx] < 1e-6) maxIdx--;
-    
+	// ----------------- Plotly 시각화 (청휘석 기준) -----------------
+	let maxIdx = totalDist.length - 1;
+	while (maxIdx > 0 && totalDist[maxIdx] < 1e-6) maxIdx--;
+	
+	
+	
     const xPyrox = [], yDist = [], yCum = [];
     let cumSum = 0;
+    
     for (let i = 0; i <= maxIdx; i++) {
-        xPyrox.push(i * 120);
-        yDist.push(totalDist[i]);
-        cumSum += totalDist[i];
-        yCum.push(cumSum);
-    }
-    
-    const traceReg = { x: xPyrox, y: yDist, type: "scatter", mode: "lines", name: "해당 구간 확률(Probability)", line: {color: "rgba(40, 167, 69, 0.8)", width: 2}, hovertemplate: "at %{x:,.0f} -> %{y:.4%}<extra></extra>" };
-    const traceAvgReg = { x: [tPyrox, tPyrox], y: [0, Math.max(...yDist) * 1.05], type: "scatter", mode: "lines", name: `평균 (Average): ${tPyrox.toLocaleString('ko-KR', {maximumFractionDigits:0})} 청휘석`, line: {color: "#d32f2f", dash: "dash"}, hoverinfo: "skip" };
-    const layoutReg = { title: "이산 확률 분포 (PMF)", xaxis: {title: "순소모 청휘석(Net Used Pyroxenes)"}, yaxis: {title: "해당 구간 확률(Probability)"}, hovermode: "x unified" };
-
-    const traceCum = { x: xPyrox, y: yCum, type: "scatter", mode: "lines", name: "누적 성공 확률(Cumulative Prob.)", line: {color: "#0056b3"}, hovertemplate: "≤ %{x:,.0f} 청휘석 -> %{y:.2%}<extra></extra>" };
-    
-    const pctX = [], pctY = [], pctText = [];
-    Object.keys(pctRes).sort((a, b) => a - b).forEach(k => {
-        pctX.push(pctRes[k] * 120);
-        pctY.push(k / 100.0);
+        // 누적 성공 확률(CDF) 연산을 위해 전체 확률 합산은 건너뛰지 않고 매번 수행합니다.
+        cumSum += totalDist[i]; 
         
-        // 툴팁에 띄워줄 텍스트 생성 (상위 50%까지는 상위, 나머지는 하위로 표기)
-        const label = k <= 50 ? `상위(Top) ${k}%` : `하위(Bottom) ${100 - k}%`;
-        pctText.push(label);
-    });
-    
-    const tracePct = { 
-        x: pctX, 
-        y: pctY, 
-        text: pctText,
-        type: "scatter", 
-        mode: "markers", 
-        marker: { symbol: "diamond", size: 10, color: "#d32f2f" }, 
-        name: "백분위수 마커(Percentile Marker)", 
-        hovertemplate: "<b>%{text}</b><br>순소모 청휘석: %{x:,.0f}개<extra></extra>" 
-    };
+        // 예를 들어 10회 모집 옵션이 활성화된 경우, 확률이 0인 구간이 많아
+		// PMF 그래프에 대한 호버링 툴팁을 정상적으로 열람할 수 없음
+		// 그래프에 표시할 데이터의 필터링 기준은 부동소수점 오차를 감안하면서도
+		// 실제 데이터가 잘려나가지 않도록 1e-10으로 설정
+        if (totalDist[i] > 1e-10) {
+            xPyrox.push(i * 120);
+            yDist.push(totalDist[i]);
+            yCum.push(cumSum);
+        }
+    }
 	
-    const traceAvgCum = { x: [tPyrox, tPyrox], y: [0, 1.05], type: "scatter", mode: "lines", name: `평균(Average): ${tPyrox.toLocaleString('ko-KR', {maximumFractionDigits:0})} 청휘석`, line: {color: "red", dash: "dash"}, hoverinfo: "skip" };
-    const layoutCum = { title: "누적 성공 확률 분포 (CDF)", xaxis: {title: "순소모 청휘석"}, yaxis: {title: "성공 확률", range: [0, 1.05]}, hovermode: "x unified" };
+	const traceReg = {
+		x: xPyrox,
+		y: yDist,
+		type: "scatter",
+		mode: "lines+markers",
+		name: "해당 구간 확률(Probability)",
+		line: {color: "rgba(40, 167, 69, 0.8)", width: 1},
+		marker: {
+            size: 2,
+            color: "rgba(40, 167, 69, 1.0)"
+        },
+		hovertemplate: "at %{x:,.0f} -> %{y:.4%}<extra></extra>"
+	};
+	
+	const traceAvgReg = {
+		x: [tPyrox, tPyrox],
+		y: [0, Math.max(...yDist) * 1.05],
+		type: "scatter",
+		mode: "lines",
+		name: `평균 (Average): ${tPyrox.toLocaleString('ko-KR', {maximumFractionDigits:0})} 청휘석`,
+		line: {color: "#d32f2f", dash: "dash"}, hoverinfo: "skip"
+	};
+	
+	
+	// ==========================================
+	// 차트 레이아웃 및 X축 눈금(Scale) 스케일 설정
+	// ==========================================
+	const xAxisConfig = {
+		title: "순소모 청휘석(Net Used Pyroxenes)",
+		tick0: 0,
+		ticklen: 4,
+		dtick: 12000,
+		//tickformat: ",",
+		minor: {
+			dtick: 6000,
+			tick0: 0,
+			showgrid: true,
+			gridcolor: "rgba(0,0,0,0.05)"
+		}
+	};
 
-    Plotly.newPlot("plot-regular", [traceReg, traceAvgReg], layoutReg);
-    Plotly.newPlot("plot-cumulative", [traceCum, tracePct, traceAvgCum], layoutCum);
-    
+	const layoutReg = { 
+		title: "이산 확률 분포 (PMF)", 
+		xaxis: xAxisConfig, 
+		yaxis: {title: "해당 구간 확률(Probability)"}, 
+		hovermode: "x unified",
+		legend: { orientation: "h", yanchor: "top", y: -0.3, xanchor: "center", x: 0.5 }, // 범례 가로 배치 및 하단 이동
+		margin: { l: 45, r: 15, t: 100, b: 80 } // 그래프 좌우 여백 축소
+	};
+	
+	const layoutCum = { 
+		title: "누적 성공 확률 분포 (CDF)", 
+		xaxis: xAxisConfig, 
+		yaxis: {title: "누적 성공 확률(Cumulative Prob.)", range: [0, 1.05]}, 
+		hovermode: "x unified",
+		legend: { orientation: "h", yanchor: "top", y: -0.3, xanchor: "center", x: 0.5 }, // 범례 가로 배치 및 하단 이동
+		margin: { l: 45, r: 15, t: 100, b: 80 } // 그래프 좌우 여백 축소
+	};
+	
+	const traceCum = {
+		x: xPyrox,
+		y: yCum,
+		type: "scatter",
+		mode: "lines",
+		name: "누적 성공 확률(Cumulative Prob.)",
+		line: {color: "#0056b3", shape: "hv"},
+		hovertemplate: "≤ %{x:,.0f} 청휘석 -> %{y:.2%}<extra></extra>"
+	};
+	
+	const pctX = [], pctY = [], pctText = [];
+	Object.keys(pctRes).sort((a, b) => a - b).forEach(k => {
+		pctX.push(pctRes[k] * 120);
+		pctY.push(k / 100.0);
+		
+		// 툴팁에 띄워줄 텍스트 생성 (상위 50%까지는 상위, 나머지는 하위로 표기)
+		const label = k <= 50 ? `상위(Top) ${k}%` : `하위(Bottom) ${100 - k}%`;
+		pctText.push(label);
+	});
+	
+	const tracePct = { 
+		x: pctX, 
+		y: pctY, 
+		text: pctText,
+		type: "scatter", 
+		mode: "markers", 
+		marker: { symbol: "diamond", size: 10, color: "#d32f2f" }, 
+		name: "백분위수 마커(Percentile Marker)", 
+		hovertemplate: "<b>%{text}</b><br>순소모 청휘석: %{x:,.0f}개<extra></extra>" 
+	};
+	
+	const traceAvgCum = {
+		x: [tPyrox, tPyrox],
+		y: [0, 1.05],
+		type: "scatter",
+		mode: "lines",
+		name: `평균(Average): ${tPyrox.toLocaleString('ko-KR', {maximumFractionDigits:0})} 청휘석`,
+		line: {color: "red", dash: "dash"}, hoverinfo: "skip"
+	};
+
+	Plotly.newPlot("plot-regular", [traceReg, traceAvgReg], layoutReg);
+	Plotly.newPlot("plot-cumulative", [traceCum, tracePct, traceAvgCum], layoutCum);
+	
 	document.getElementById("toggle-plot-btn").innerText = "이산 확률 분포(PMF) 보기"
-    document.getElementById("toggle-plot-btn").disabled = false;
-    document.getElementById("save-img-btn").disabled = false;
-    document.getElementById("plot-cumulative").style.display = "block";
-    document.getElementById("plot-regular").style.display = "none";
+	document.getElementById("toggle-plot-btn").disabled = false;
+	document.getElementById("save-img-btn").disabled = false;
+	document.getElementById("plot-cumulative").style.display = "block";
+	document.getElementById("plot-regular").style.display = "none";
 	runBtn.innerText = "계산 실행하기";
-    runBtn.disabled = false;
+	runBtn.disabled = false;
 }
 
 // UI 토글 함수 및 초기화
 document.addEventListener('DOMContentLoaded', () => {
-    const runBtn = document.getElementById("run-btn");
-    runBtn.disabled = false;
-    runBtn.innerText = "계산 실행하기";
-    runBtn.addEventListener("click", runSimulation);
+	const runBtn = document.getElementById("run-btn");
+	runBtn.disabled = false;
+	runBtn.innerText = "계산 실행하기";
+	runBtn.addEventListener("click", runSimulation);
 
-    document.getElementById("toggle-plot-btn").addEventListener("click", () => {
-        const btn = document.getElementById("toggle-plot-btn");
-        const plotCum = document.getElementById("plot-cumulative");
-        const plotReg = document.getElementById("plot-regular");
+	document.getElementById("toggle-plot-btn").addEventListener("click", () => {
+		const btn = document.getElementById("toggle-plot-btn");
+		const plotCum = document.getElementById("plot-cumulative");
+		const plotReg = document.getElementById("plot-regular");
 
-        if (plotCum.style.display !== "none") {
-            plotCum.style.display = "none";
-            plotReg.style.display = "block";
-            btn.innerText = "누적 확률 분포(CMF) 보기";
-        } else {
-            plotCum.style.display = "block";
-            plotReg.style.display = "none";
-            btn.innerText = "이산 확률 분포(PMF) 보기";
-        }
-    });
+		if (plotCum.style.display !== "none") {
+			plotCum.style.display = "none";
+			plotReg.style.display = "block";
+			btn.innerText = "누적 확률 분포(CMF) 보기";
+		} else {
+			plotCum.style.display = "block";
+			plotReg.style.display = "none";
+			btn.innerText = "이산 확률 분포(PMF) 보기";
+		}
+	});
 });
 	</script>
 	
@@ -831,46 +1150,47 @@ function createPeriodRowHTML(idx, data = {}) {
 	const ceil = (sys === 'old' && data.use_ceiling) ? 'checked' : '';
 	const ceil_th = data.ceiling_th ?? 150;
 	const showCeiling = sys === 'old' ? 'inline-block' : 'none';
-
+	
 	return `
 		<div class="period-row" data-idx="${idx}">
-			<div>
-				<strong>[기간 ${idx}]</strong>
-				<select class="p_system save-target" onchange="toggleSystem(this)" style="width: 100px; font-weight:bold; background-color:#fff;">
+			<!-- 헤더 영역 (순번, 메모, 시스템, 삭제버튼) -->
+			<div class="period-header">
+				<strong>${idx}.</strong>
+				<select class="p_system save-target" onchange="toggleSystem(this)">
 					<option value="old" ${sys==='old'?'selected':''}>기존 방식</option>
 					<option value="new" ${sys==='new'?'selected':''}>신규 방식</option>
 				</select>
-				<input type="text" class="p_memo save-target" placeholder="(메모)" value="${memo}" style="width: 160px; margin-left: 10px;">
+				<input type="text" class="p_memo save-target" placeholder="(메모)" value="${memo}">
+				<button type="button" class="btn-danger remove-btn" onclick="removePeriod(this)">✕</button>
 			</div>
 			
-			<div>
-				<label style="width: auto; margin-left: 10px;">명함:</label>
-				<input type="number" class="p_targets save-target" value="${n}" min="1"> 명
-				<label style="width: auto; margin-left: 5px;">픽업 중복:</label>
-				<input type="number" class="p_dupes save-target" value="${d}" min="0"> 번
+			<!-- 목표 설정 영역 (명함, 중복) -->
+			<div class="period-targets">
+				<label>명함: <input type="number" class="p_targets save-target" value="${n}" min="1"> 명</label>
+				<label>픽업 중복: <input type="number" class="p_dupes save-target" value="${d}" min="0"> 번</label>
 			</div>
 			
-			<div>
-				<label style="width: auto; margin-left: 10px;"><input type="checkbox" class="p_free100 save-target" ${f100}> 무료 100회</label>
-				<label style="width: auto; margin-left: 5px;"><input type="checkbox" class="p_fes save-target" ${fes}> Fes(3★ 6%)</label>
-				<label style="width: auto; margin-left: 5px;"><input type="checkbox" class="p_10pull save-target" ${p10}> 10회 모집 </label>
-				<div class="tooltip">?<span class="tooltiptext">10회 모집 단위로 가챠를 진행하며, 10회차에 2성 이상이 보장됩니다.</span></div>
+			<!-- 옵션 설정 영역 (체크박스) -->
+			<div class="period-options" style="flex-grow: 1;">
+				<label><input type="checkbox" class="p_free100 save-target" ${f100}> 무료 100회</label>
+				<label><input type="checkbox" class="p_fes save-target" ${fes}> Fes(3★ 6%)</label>
+				<label>
+					<input type="checkbox" class="p_10pull save-target" ${p10}> 10회 모집 
+					<div class="tooltip">?<span class="tooltiptext">10회 모집 단위로 가챠를 진행하며, 10회차에 2성 이상이 보장됩니다.</span></div>
+				</label>
 			</div>
-			<div>
-				<span class="ceiling-wrapper" style="display: ${showCeiling};">
-					<label style="width: auto; margin-left: 10px;">
-						<input type="checkbox" class="p_ceiling save-target" onchange="toggleCeilingTh(this)" ${ceil}> 고의 천장 전략 </input>
-						<div class="tooltip">?<span class="tooltiptext">기존 가챠에서, 도중에 목표를 달성하더라도 다음 천장까지 가챠를 돌리는 전략입니다. 소모되는 청휘석은 증가하는 대신, 보정치(천장 교환)를 획득한 직후 가챠를 종료하므로 기존 가챠에서 1뽑당 엘리그마/엘레프 획득효율이 가장 높은 전략입니다.</span></div>
-					</label>
-					<label class="ceiling-th-container" style="width: auto; margin-left: 5px; display: ${ceil?'inline-block':'none'};">
-						기준점: <input type="number" class="p_ceiling_th save-target" value="${ceil_th}" min="0" max="199" style="width: 50px;">
-						<div class="tooltip">?<span class="tooltiptext">고의 천장 전략을 사용할 기준점입니다. 예를 들어, 150을 입력한 경우 150스택 미만(다음 천장까지 50뽑 초과 남음)에서 목표를 달성했을 때는 가챠를 즉시 중단하며, 150스택 이상(다음 천장까지 50뽑 이하 남음)에서 목표를 달성했을 때는 고의 천장을 수행합니다.<br>
-						0이 입력된다면 항상 고의 천장 전략을 사용합니다.<br>
-						항상 고의천장 전략을 사용하는 것이 1뽑당 엘리그마/엘레프 획득효율은 가장 높지만, 그만큼 청휘석 소모량이 많아집니다.</span></div>
-					</label>
-				</span>
-			<div>
-			<button type="button" class="btn-danger remove-btn" onclick="removePeriod(this)">✕</button>
+			
+			<!-- 고의천장 설정 영역 -->
+			<div class="ceiling-wrapper" style="display: ${showCeiling}; flex-grow: 1;">
+				<label>
+					<input type="checkbox" class="p_ceiling save-target" onchange="toggleCeilingTh(this)" ${ceil}> 고의 천장 전략 
+					<div class="tooltip">?<span class="tooltiptext">기존 가챠에서, 도중에 목표를 달성하더라도 다음 천장까지 가챠를 돌리는 전략입니다. 소모되는 청휘석은 증가하는 대신, 보정치(천장 교환)를 획득한 직후 가챠를 종료하므로 기존 가챠에서 1뽑당 엘리그마/엘레프 획득효율이 가장 높은 전략입니다.</span></div>
+				</label>
+				<label class="ceiling-th-container" style="display: ${ceil?'inline-flex':'none'};">
+					기준점: <input type="number" class="p_ceiling_th save-target" value="${ceil_th}" min="0" max="199">
+					<div class="tooltip">?<span class="tooltiptext">고의 천장 전략을 사용할 기준점입니다. 예를 들어, 150을 입력한 경우 150스택 미만(다음 천장까지 50뽑 초과 남음)에서 목표를 달성했을 때는 가챠를 즉시 중단하며, 150스택 이상(다음 천장까지 50뽑 이하 남음)에서 목표를 달성했을 때는 고의 천장을 수행합니다.<br>0이 입력된다면 항상 고의 천장 전략을 사용합니다.<br>항상 고의천장 전략을 사용하는 것이 1뽑당 엘리그마/엘레프 획득효율은 가장 높지만, 그만큼 청휘석 소모량이 많아집니다.</span></div>
+				</label>
+			</div>
 		</div>
 	`;
 }
@@ -889,7 +1209,7 @@ function removePeriod(btn) {
 		btn.closest('.period-row').remove();
 		// 번호 재정렬
 		Array.from(container.children).forEach((row, i) => {
-			row.querySelector('strong').innerText = `[픽업 ${i+1}]`;
+			row.querySelector('strong').innerText = `${i+1}. `;
 		});
 		updateRemoveButtons();
 		saveData();
