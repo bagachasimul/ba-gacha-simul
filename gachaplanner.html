@@ -187,7 +187,7 @@
 	  .period-header .remove-btn { flex-shrink: 0; }
 
 	  .period-header strong { font-size: 16px; margin-right: 0; }
-	  .period-header .p_memo { flex-grow: 1; flex-shrink: 1; min-width: 40px; }
+	  .period-header .p_memo { flex: 1; min-width: 20px; }
 	  .period-header .p_system { font-weight: bold; background-color: #fff; }
 	  .period-header .remove-btn { margin: 0; padding: 6px 12px; }
 
@@ -253,7 +253,7 @@
 		line-height: 1.4; 
 		font-size: 12px; 
 		box-shadow: 0px 4px 6px rgba(0,0,0,0.3); 
-		white-space: normal; 
+		white-space: pre-wrap; 
 	  }
 
 	  .tooltip .tooltiptext::after { 
@@ -282,35 +282,16 @@
 	  @media (max-width: 768px) {
 		body { padding: 10px; }
 		
-		/* 입력 그룹 및 라벨이 세로로 배치되도록 수정 */
-		.input-group { display: flex; flex-direction: column; align-items: flex-start; }
-		label { width: 100%; margin-bottom: 5px; white-space: normal; }
-		
-		/* 모든 인풋 박스가 화면 너비에 맞게 축소되도록 강제 적용 */
-		input[type="text"], 
-		input[type="number"], 
-		select { 
-		  width: 100% !important; 
-		  max-width: 100%; 
-		  box-sizing: border-box; 
-		}
-
-		/* 기간 설정 폼 레이아웃 유연화 */
-		.period-header { flex-wrap: wrap; }
-		.period-header .p_memo { width: 100%; margin-top: 5px; }
-		.ceiling-wrapper, .ceiling-th-container { display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
-		.ceiling-th-container input { width: 100% !important; margin: 5px 0 0 0; }
-		
-		/* 모바일에서 툴팁이 화면 밖으로 삐져나가는 현상 방지 (화면 중앙 팝업 형태로 변경) */
+		/* 모바일에서 툴팁이 화면 밖으로 삐져나가는 현상 방지 */
 		.tooltip .tooltiptext {
 		  position: fixed;
 		  top: 50%;
 		  left: 50%;
-		  transform: translate(-50%, -50%); /* 화면 정중앙에 배치 */
+		  transform: translate(-50%, -50%);
 		  width: 85%; 
 		  max-width: 320px;
 		  bottom: auto;
-		  z-index: 9999; /* 다른 요소들보다 무조건 위에 오도록 설정 */
+		  z-index: 9999;
 		  box-shadow: 0px 4px 15px rgba(0,0,0,0.4);
 		}
 		
@@ -328,7 +309,7 @@
 		<a href="gachasim.html" class="nav-sim">📊 신/구 시스템 비교</a>
 		<a href="https://github.com/bagachasimul/ba-gacha-simul" class="nav-github">GitHub에서 소스코드 보기</a>
 	</div>
-	<h1>블루 아카이브 가챠 플래너</h1>
+	<h1>가챠 플래너</h1>
 	
 	<div class="top-controls">
 		<strong style="width: 100%; margin-bottom: 5px;">[데이터 관리]</strong>
@@ -884,9 +865,9 @@ async function runSimulation() {
 	const pctRes = getPercentiles(totalDist, pctList);
 	const tPyrox = tPulls * 120;
 	
-	let resultText = `=========================================\n`;
-	resultText +=	 `        블루 아카이브 가챠 플래너\n`;
-	resultText +=	 `=========================================\n\n`;
+	let resultText = `<hr style="margin: 0;">`;
+	resultText +=	 `<div style="padding: 10px 0; text-align: center;">블루 아카이브 가챠 플래너</div>`;
+	resultText +=	 `<hr style="margin: 0;">\n\n`;
 	resultText += `▶ [전체 기간 목록]\n`;
 	
 	periods.forEach((p, i) => {
@@ -917,11 +898,11 @@ async function runSimulation() {
 	};
 	
 	resultText += `\n▶ [청휘석 필요량 요약]\n`;
-	resultText += `  • 평균 기대 청휘석 소모 : ${tPyrox.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개 (${tPulls.toFixed(2)}뽑)\n`;
+	resultText += `• 평균 기대 청휘석 소모 : ${tPyrox.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개 (${tPulls.toFixed(2)}뽑)\n`;
 	
 	if (pctRes[95] !== undefined) {
 		const colorCode = getLuckColor(95);
-		resultText += `  • 운 <span style='color:${colorCode}; font-weight:bold;'>하위 5%</span> 기준 청휘석: <span style='color:${colorCode}; font-weight:bold;'>${(pctRes[95] * 120).toLocaleString('ko-KR')} 개</span> (${pctRes[95]}뽑)\n`;
+		resultText += `• 운 <span style='color:${colorCode}; font-weight:bold;'>하위 5%</span> 기준 청휘석: <span style='color:${colorCode}; font-weight:bold;'>${(pctRes[95] * 120).toLocaleString('ko-KR')} 개</span> (${pctRes[95]}뽑)\n`;
 	}
 	
 	resultText += `\n▶ [상위 %별 필요 청휘석(운 척도)]\n`;
@@ -929,7 +910,7 @@ async function runSimulation() {
 		const pyrox = pctRes[k] * 120;
 		const colorCode = getLuckColor(k);
 		const prefix = k <= 50 ? `상위 ${String(k).padStart(2, ' ')}%` : `하위 ${String(100 - k).padStart(2, ' ')}%`;
-		resultText += `  - 운 <span style='color:${colorCode}; font-weight:bold;'>${prefix}</span>: <span style='color:${colorCode}; font-weight:bold;'>${pyrox.toLocaleString('ko-KR')} 청휘석</span> (${pctRes[k]}뽑)\n`; // .padStart(8, ' ')
+		resultText += `- 운 <span style='color:${colorCode}; font-weight:bold;'>${prefix}</span>: <span style='color:${colorCode}; font-weight:bold;'>${pyrox.toLocaleString('ko-KR')} 청휘석</span> (${pctRes[k]}뽑)\n`; // .padStart(8, ' ')
 	});
 	
 	let eligmaRateText = "";
@@ -947,11 +928,13 @@ async function runSimulation() {
 	}
 	
 	resultText += `\n▶ [부가 재화 획득 기대량]\n`;
-	resultText += `  - 엘리그마 : ${tEligma.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개${eligmaRateText}\n`;
-	resultText += `  - 목표 엘레프: ${tEleph.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개${elephRateText}\n`;
+	resultText += `- 엘리그마 : ${tEligma.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개${eligmaRateText}\n`;
+	resultText += `- 목표 엘레프: ${tEleph.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개${elephRateText}\n`;
 	
 	resultText += `\n▶ [참고사항]\n`;
-	resultText += `  - 무과금 유저는 월평균 약 9,600 청휘석 이상<div class="tooltip">?<span class="tooltiptext">- 일간 미션 : 20*30 = 600
+	resultText += `- 무과금 유저는 월평균 약 9,600 청휘석,\n`;
+
+	resultText += `- 월정액 유저는 약 12,000 청휘석 이상 획득<div class="tooltip">?<span class="tooltiptext">- 일간 미션 : 20*30 = 600
 - 주간 미션 : 120*4 = 480
 - 출석 미션 합계 : 450
 - 전술대회 일일 보상(in 1000) : 18*30 = 540
@@ -963,10 +946,9 @@ async function runSimulation() {
 - 제약해제결전 미션: 10
 - 점검 보상 : 600*2 = 1,200
 - 이벤트 보상(월평균 1.5회 개최) : 평균 2,000*1.5 = 약 3,000
-- 그 외의 수급처(방송 기념 보상, 리딤 코드, 웹이벤트 보상, 새로운 지역의 도전과제/업적, 메인 스토리/인연 스토리 보상 등)</span></div>,\n`;
-
-	resultText += `  - 월정액 유저는 약 12,000 청휘석 이상<div class="tooltip">?<span class="tooltiptext">- 월정액 : 392 + 40*30 = 1,592
-- 월정액 Half : 176 + 20*30 = 776</span></div> 획득\n`;
+- 그 외의 수급처(방송 기념 보상, 리딤 코드, 웹이벤트 보상, 새로운 지역의 도전과제/업적, 메인 스토리/인연 스토리 보상 등)
+- 월정액 : 392 + 40*30 = 1,592
+- 월정액 Half : 176 + 20*30 = 776</span></div>\n`;
 
 resultText += `(대결전 티켓을 쓰지 않는다면 해당분은 제하여 계산)\n`;
 	
@@ -1044,6 +1026,7 @@ resultText += `(대결전 티켓을 쓰지 않는다면 해당분은 제하여 �
 		xaxis: xAxisConfig, 
 		yaxis: {title: "해당 구간 확률(Probability)"}, 
 		hovermode: "x unified",
+		dragmode: false,
 		legend: { orientation: "h", yanchor: "top", y: -0.3, xanchor: "center", x: 0.5 }, // 범례 가로 배치 및 하단 이동
 		margin: { l: 45, r: 15, t: 100, b: 80 } // 그래프 좌우 여백 축소
 	};
@@ -1053,6 +1036,7 @@ resultText += `(대결전 티켓을 쓰지 않는다면 해당분은 제하여 �
 		xaxis: xAxisConfig, 
 		yaxis: {title: "누적 성공 확률(Cumulative Prob.)", range: [0, 1.05]}, 
 		hovermode: "x unified",
+		dragmode: false,
 		legend: { orientation: "h", yanchor: "top", y: -0.3, xanchor: "center", x: 0.5 }, // 범례 가로 배치 및 하단 이동
 		margin: { l: 45, r: 15, t: 100, b: 80 } // 그래프 좌우 여백 축소
 	};
@@ -1097,8 +1081,8 @@ resultText += `(대결전 티켓을 쓰지 않는다면 해당분은 제하여 �
 		line: {color: "red", dash: "dash"}, hoverinfo: "skip"
 	};
 
-	Plotly.newPlot("plot-regular", [traceReg, traceAvgReg], layoutReg);
-	Plotly.newPlot("plot-cumulative", [traceCum, tracePct, traceAvgCum], layoutCum);
+	Plotly.newPlot("plot-regular", [traceReg, traceAvgReg], layoutReg, {responsive: true});
+	Plotly.newPlot("plot-cumulative", [traceCum, tracePct, traceAvgCum], layoutCum, {responsive: true});
 	
 	document.getElementById("toggle-plot-btn").innerText = "이산 확률 분포(PMF) 보기"
 	document.getElementById("toggle-plot-btn").disabled = false;
@@ -1125,10 +1109,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			plotCum.style.display = "none";
 			plotReg.style.display = "block";
 			btn.innerText = "누적 확률 분포(CMF) 보기";
+			Plotly.Plots.resize(plotReg);
 		} else {
 			plotCum.style.display = "block";
 			plotReg.style.display = "none";
 			btn.innerText = "이산 확률 분포(PMF) 보기";
+			Plotly.Plots.resize(plotCum);
 		}
 	});
 });
