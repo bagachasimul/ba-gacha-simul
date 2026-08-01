@@ -646,8 +646,8 @@ async function runSimulation() {
     const tPyrox = tPulls * 120;
     
     let resultText = `========================================================\n`;
-    resultText += `       블루 아카이브 가챠 플래너\n`;
-    resultText += `========================================================\n\n`;
+    resultText +=    `               블루 아카이브 가챠 플래너\n`;
+    resultText +=    `========================================================\n\n`;
     resultText += `▶ [전체 기간 목록]\n`;
     
     periods.forEach((p, i) => {
@@ -658,7 +658,7 @@ async function runSimulation() {
             ceilingText += ` / 고의천장전략: ${p.use_ceiling ? "사용" : "미사용"}`;
             if (p.use_ceiling) ceilingText += ` (기준점 ${p.ceiling_th}스택)`;
         }
-        resultText += ` - ${i + 1}. ${memo} (시스템: ${sysName} / 목표명함: ${p.n} / 중복: ${p.d}${ceilingText})\n`;
+        resultText += ` - ${i + 1}. ${memo} (시스템: ${sysName} / 목표명함: ${p.n} / 중복: ${p.d}${ceilingText})\n\n`;
     });
     
     // 행운도(백분위수)에 따른 색상 생성 함수
@@ -677,7 +677,7 @@ async function runSimulation() {
         return `hsl(${hue.toFixed(1)}, 100%, ${lightness.toFixed(1)}%)`;
     };
     
-    resultText += `\n▶ [종합 예상 자원 소모량]\n`;
+    resultText += `\n▶ [청휘석 필요량 요약]\n`;
     resultText += `  • 평균 기대 청휘석 소모 : ${tPyrox.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개 (${tPulls.toFixed(2)}뽑)\n`;
     
     if (pctRes[95] !== undefined) {
@@ -710,6 +710,27 @@ async function runSimulation() {
 	resultText += `\n▶ [부가 재화 획득 기대량]\n`;
     resultText += `  - 총 획득 엘리그마 : ${tEligma.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개${eligmaRateText}\n`;
     resultText += `  - 총 획득 목표 엘레프: ${tEleph.toLocaleString('ko-KR', {maximumFractionDigits:0})} 개${elephRateText}\n`;
+	
+	resultText += `\n▶ [참고사항]\n`;
+	resultText += `  - 평균적으로 무과금 유저는 월평균 약 9,600 청휘석 이상<div class="tooltip">?<span class="tooltiptext">- 일간 미션 : 20*30 = 600
+- 주간 미션 : 120*4 = 480
+- 출석 미션 합계 : 450
+- 전술대회 일일 보상(in 1000) : 18*30 = 540
+- 총력전 일간 미션 + 누적 점수 보상 : 720
+- 총력전 랭킹 보상(골드) : 1,000
+- 대결전 미션 : 70
+- 대결전 10회 모집 티켓 : 1,200
+- 종합전술시험 일간 미션 : 10*7 = 70
+- 제약해제결전 미션: 10
+- 점검 보상 : 600*2 = 1,200
+- 이벤트 보상(월평균 1.5회 개최) : 평균 2,000*1.5 = 약 3,000
+- 그 외의 수급처(방송 기념 보상, 리딤 코드, 웹이벤트 보상, 새로운 지역의 도전과제/업적, 메인 스토리/인연 스토리 보상 등)</span></div>,\n`;
+
+	resultText += `  - 월정액 과금 유저는 월평균 약 12,000 청휘석 이상<div class="tooltip">?<span class="tooltiptext">- 월정액 : 392 + 40*30 = 1,592
+- 월정액 Half : 176 + 20*30 = 776</span></div> 획득\n`;
+
+resultText += `    (대결전 티켓을 사용하지 않는 경우, 해당분은 제하여 계산)\n`;
+	
     resultText += `\n<span style='color: #6c757d;'>https://bagachasimul.github.io/ba-gacha-simul</span>`;
 	
     outDiv.innerHTML = resultText;
