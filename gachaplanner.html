@@ -599,8 +599,8 @@ def run_simulation(event=None):
 		result_text += f"  - 운 <span style='color:{color_code}; font-weight:bold;'>{prefix}</span>: <span style='color:{color_code}; font-weight:bold;'>{pyro:8,.0f} 청휘석</span> ({pct_res[k]}뽑)\n"
 
 	result_text += f"\n▶ [부가 재화 획득 기대량]\n"
-	result_text += f"  - 총 획득 엘리그마 : {t_eligma:,.0f} 개 <span style='font-weight:bold;'>(120청휘석당 {eligma_rate:.2f}개)</span>\n"
-	result_text += f"  - 총 획득 목표 엘레프: {t_eleph:,.0f} 개 <span style='font-weight:bold;'>(120청휘석당 {eleph_rate:.2f}개)</span>\n"
+	result_text += f"  - 총 획득 엘리그마 : <span style='font-weight:bold;'>{t_eligma:,.0f} 개 (120청휘석당 {eligma_rate:.2f}개)</span>\n"
+	result_text += f"  - 총 획득 목표 엘레프: <span style='font-weight:bold;'>{t_eleph:,.0f} 개 (120청휘석당 {eleph_rate:.2f}개)</span>\n"
 	result_text += "\n<span style='color: #6c757d;'>https://bagachasimul.github.io/ba-gacha-simul</span>"
 	
 	out_div.innerHTML = result_text
